@@ -10,7 +10,7 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 
 - Estética cálida Starbucks + Peanuts basada en la referencia oficial ya incluida en el proyecto.
 - Portada, mensajes y paleta controlados desde `config/settings.json`.
-- Navegación por bloques, avance local y regreso al punto anterior.
+- Navegación por cinco momentos del Customer Journey: Prepara, Llega, Elige, Vive y Disfruta.
 - **Cumple** y **No aplica** avanzan automáticamente; **No cumple** se detiene para definir una acción.
 - Corrección inmediata sugerida al seleccionar **No cumple** y reconocimiento al seleccionar **Cumple**.
 - Aviso de responsabilidad obligatorio al iniciar o reanudar.
@@ -20,12 +20,12 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 ## Cómo funciona
 
 1. Captura únicamente **Tienda** y **Quién valida**.
-2. Responde cada control; puedes cambiar de bloque desde el navegador superior:
+2. Responde cada control; puedes cambiar de momento desde el navegador superior:
    - **Cumple = 1**
    - **No cumple = 0** y requiere una acción breve.
    - **No aplica** queda fuera del cálculo.
-3. Revisa primero los puntos a favor y después las correcciones inmediatas.
-4. Guarda el resumen PDF desde la misma pantalla de resultado.
+3. Revisa primero los puntos a favor y después la ruta de mejora.
+4. Ajusta cualquier acuerdo desde el resumen antes de exportar el PDF.
 
 La tasa de éxito se calcula así:
 
@@ -55,7 +55,15 @@ python scripts/generate_store_report.py \
   --output output/pdf/Reporte_Ejemplo_Fall26.pdf
 ```
 
-El reporte reconoce los puntos **Cumple**, muestra la tasa de éxito por bloque y propone una corrección concreta para cada **No cumple**.
+El reporte reconoce los puntos **Cumple**, muestra la tasa de éxito por momento del Customer Journey y conserva una ruta de mejora con acción, acuerdo, responsable y fecha.
+
+## iPhone y iPad
+
+La aplicación respeta las áreas seguras de iOS, usa controles táctiles de al menos 48 px y puede agregarse a la pantalla de inicio. Los iconos se regeneran sin dependencias externas con:
+
+```bash
+python scripts/build_ios_assets.py
+```
 
 ## Referencias visuales
 

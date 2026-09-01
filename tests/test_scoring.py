@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from scoring import (  # noqa: E402
     build_execution_insights,
+    build_journey_summary,
     build_section_summary,
     calculate_counts,
     calculate_score,
@@ -41,6 +42,16 @@ class ScoringTests(unittest.TestCase):
             {"sectionId": "a", "sectionTitle": "A", "status": "na"},
             {"sectionId": "b", "sectionTitle": "B", "status": "no_cumple", "comment": "Acción"},
         ])
+        self.assertEqual(summary[0]["score"], 100.0)
+        self.assertEqual(summary[1]["score"], 0.0)
+
+    def test_customer_journey_keeps_stage_order_and_scores(self):
+        summary = build_journey_summary([
+            {"journeyStageId": "llega", "journeyStageTitle": "Llega", "status": "cumple"},
+            {"journeyStageId": "llega", "journeyStageTitle": "Llega", "status": "na"},
+            {"journeyStageId": "elige", "journeyStageTitle": "Elige", "status": "no_cumple", "comment": "Corregir"},
+        ])
+        self.assertEqual([stage["id"] for stage in summary], ["llega", "elige"])
         self.assertEqual(summary[0]["score"], 100.0)
         self.assertEqual(summary[1]["score"], 0.0)
 

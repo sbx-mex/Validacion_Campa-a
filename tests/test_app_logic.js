@@ -8,6 +8,7 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const code = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const settingsFile = JSON.parse(fs.readFileSync(path.join(root, "config/settings.json"), "utf8"));
+const checklistFile = JSON.parse(fs.readFileSync(path.join(root, "data/fall26_checklist.json"), "utf8"));
 const context = vm.createContext({
   console,
   Date,
@@ -39,12 +40,17 @@ assert.equal(stats.score, 66.7, "No aplica debe excluirse del cálculo.");
 assert.equal(stats.na, 1);
 
 vm.runInContext(`
-  checklist = {guidance:{correctiveActions:{q02:"Coloca el material vigente y vuelve a validar."}}};
+  checklist = ${JSON.stringify(checklistFile)};
 `, context);
 assert.equal(
   vm.runInContext('correctionActionFor({id:"q02",criterion:"Criterio"})', context),
-  "Coloca el material vigente y vuelve a validar.",
+  "Coloca el vaso verde México 2026 y regístralo con el mismo código del vaso core.",
   "Cada No cumple debe recuperar su corrección inmediata desde JSON.",
 );
+assert.equal(
+  vm.runInContext('journeyStageFor("elige").title', context),
+  "Elige",
+  "La navegación debe resolver los cinco momentos del Customer Journey.",
+);
 
-console.log("Lógica web válida: retención, avance rápido, puntuación sin N/A y corrección inmediata.");
+console.log("Lógica web válida: retención, Customer Journey, avance rápido, puntuación sin N/A y corrección inmediata.");

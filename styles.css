@@ -364,6 +364,7 @@ body {
 .section-chip.is-active b { background: var(--orange); color: #fff; }
 .section-chip.is-complete { border-color: #8eb8a6; background: #eef8f3; color: var(--green); }
 .section-chip.is-complete b { background: var(--green); color: #fff; }
+.section-rail.is-locked .section-chip:not(.is-active) { opacity: .42; }
 .save-status { display: flex; justify-content: flex-end; gap: 6px; align-items: center; margin: 0 4px 10px; color: #65716b; font-size: 9px; font-weight: 800; }
 .save-status i { width: 7px; height: 7px; border-radius: 50%; background: #2e9b68; box-shadow: 0 0 0 4px rgba(46,155,104,.1); }
 
@@ -472,4 +473,199 @@ body {
 
 @media print {
   .responsibility-card, .responsibility-confirm, .save-status, .section-rail, .response-guidance, .summary-privacy-note, .privacy-dialog { display: none !important; }
+}
+
+/* v5 · Customer Journey cálido, táctil y compatible con iOS */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 130px;
+}
+
+body {
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input {
+  touch-action: manipulation;
+}
+
+.privacy-bar,
+.app-header {
+  padding-left: max(18px, env(safe-area-inset-left));
+  padding-right: max(18px, env(safe-area-inset-right));
+}
+
+.app-main {
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.section-rail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  overflow: visible;
+  padding: 4px 1px 9px;
+}
+
+.section-chip {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 52px;
+  padding: 7px 9px;
+  border-radius: 15px;
+  white-space: normal;
+  text-align: left;
+}
+
+.section-chip b {
+  width: 24px;
+  height: 24px;
+}
+
+.section-chip > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 10px;
+}
+
+.section-chip small {
+  overflow: hidden;
+  color: #786f69;
+  font-size: 7.5px;
+  font-weight: 750;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+}
+
+.section-chip.is-active small,
+.section-chip.is-complete small {
+  color: inherit;
+  opacity: .78;
+}
+
+.section-result header span {
+  display: grid;
+  gap: 1px;
+}
+
+.section-result header em {
+  color: var(--muted);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.panel-heading > div > p {
+  max-width: 560px;
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.opportunity {
+  position: relative;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding-bottom: 14px;
+  background: linear-gradient(135deg, #fff8ed, #fffdf9);
+}
+
+.opportunity small b {
+  color: var(--green);
+}
+
+.opportunity-edit {
+  justify-self: start;
+  min-height: 36px;
+  margin-top: 6px;
+  padding: 7px 11px;
+  border: 1px solid #a9c8bb;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.opportunity-edit:hover,
+.opportunity-edit:focus-visible {
+  border-color: var(--green);
+  background: var(--pale-green);
+}
+
+.summary-actions .primary-button {
+  min-height: 48px;
+}
+
+@media (max-width: 760px) {
+  .app-main {
+    width: min(100% - 16px, 620px);
+  }
+
+  .section-rail {
+    gap: 5px;
+    margin-inline: 0;
+  }
+
+  .section-chip {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    min-height: 52px;
+    padding: 6px 3px;
+    text-align: center;
+  }
+
+  .section-chip > span {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-chip small {
+    display: none;
+  }
+
+  .question-nav {
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .question-nav button,
+  .choice,
+  .primary-button,
+  .secondary-button {
+    min-height: 48px;
+  }
+
+  .opportunity {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .opportunity > span {
+    position: absolute;
+    top: 13px;
+    right: 13px;
+  }
+}
+
+@media (display-mode: standalone) {
+  .privacy-bar {
+    padding-top: max(6px, env(safe-area-inset-top));
+  }
+
+  .site-footer {
+    padding-bottom: max(36px, calc(16px + env(safe-area-inset-bottom)));
+  }
+}
+
+@media print {
+  .opportunity-edit { display: none !important; }
+  .section-result header em { color: #555 !important; }
 }

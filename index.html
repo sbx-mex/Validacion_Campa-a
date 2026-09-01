@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#003b2d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Validación Fall">
+  <meta name="format-detection" content="telephone=no">
   <meta name="description" content="Validación ejecutiva de campaña Fall 26 para operación en tienda.">
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
   <meta name="referrer" content="no-referrer">
@@ -11,6 +15,7 @@
   <title>Validación Campaña · Fall 26</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
@@ -115,7 +120,7 @@
         </div>
       </div>
       <div class="progress-track" aria-hidden="true"><i id="progressBar"></i></div>
-      <nav id="sectionRail" class="section-rail" aria-label="Secciones del recorrido"></nav>
+      <nav id="sectionRail" class="section-rail" aria-label="Momentos del Customer Journey"></nav>
       <div class="save-status" role="status"><i aria-hidden="true"></i><span id="saveStatus">Avance guardado en este dispositivo</span></div>
 
       <article id="questionCard" class="question-card">
@@ -196,7 +201,7 @@
       </div>
 
       <section class="summary-panel" aria-labelledby="readingTitle">
-        <div class="panel-heading"><div><span>LECTURA EJECUTIVA</span><h3 id="readingTitle">¿Dónde enfocar?</h3></div><span id="resultBadge" class="result-badge">—</span></div>
+        <div class="panel-heading"><div><span>CUSTOMER JOURNEY</span><h3 id="readingTitle">Resultado por momento</h3></div><span id="resultBadge" class="result-badge">—</span></div>
         <p id="resultMessage" class="result-message"></p>
         <div id="sectionResults" class="section-results"></div>
       </section>
@@ -207,12 +212,12 @@
       </section>
 
       <section class="summary-panel" aria-labelledby="opportunitiesTitle">
-        <div class="panel-heading"><div><span>MEJORA CONTINUA</span><h3 id="opportunitiesTitle">Oportunidades detectadas</h3></div><strong id="opportunityCount">0</strong></div>
+        <div class="panel-heading"><div><span>MEJORA CONTINUA</span><h3 id="opportunitiesTitle">Tu ruta de mejora</h3><p>Conserva el acuerdo, ajústalo si hace falta y vuelve a validar.</p></div><strong id="opportunityCount">0</strong></div>
         <div id="opportunitiesList" class="opportunities-list"></div>
       </section>
 
       <div class="summary-actions">
-        <button id="printReport" class="primary-button" type="button">Guardar resumen PDF</button>
+        <button id="printReport" class="primary-button" type="button">Exportar resumen PDF</button>
         <button id="restartButton" class="text-button" type="button">Nueva validación</button>
       </div>
       <aside class="summary-privacy-note"><b>Uso responsable</b><span id="summaryPrivacyWarning">El reporte debe permanecer únicamente en canales internos autorizados.</span></aside>

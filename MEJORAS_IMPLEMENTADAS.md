@@ -26,3 +26,15 @@
 21. Aviso de privacidad resumido, confirmable y visible en web y PDF.
 22. Dieciséis referencias sustituidas y optimizadas con Python en dos lotes y un paquete combinado.
 23. Cuatro nuevos apoyos visuales: Colombia Nariño, Promoplanner/Delivery, Rewards y Café Blonde.
+
+## Customer Journey e iOS
+
+24. Cinco momentos operativos sustituyen el mapa horizontal de nueve bloques: Prepara, Llega, Elige, Vive y Disfruta.
+25. Resumen de campaña agrupado por momento del Customer Journey para localizar oportunidades más rápido.
+26. Cada oportunidad conserva la corrección sugerida y el acuerdo capturado.
+27. Botón **Ajustar acuerdo** para volver directamente al punto y corregir el seguimiento antes de exportar.
+28. Nombre de archivo PDF automático con tienda y fecha al usar la exportación rápida.
+29. Reporte Python con ruta de mejora, responsable y fecha de cierre.
+30. Metaetiquetas, áreas seguras y controles táctiles optimizados para iPhone y iPad.
+31. Iconos nítidos de 180, 192 y 512 px generados con Python y disponibles sin conexión.
+32. Caché PWA v5 con todos los recursos críticos del recorrido.

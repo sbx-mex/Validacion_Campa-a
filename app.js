@@ -18,6 +18,7 @@ let questions = [];
 let state;
 let toastTimer;
 let autoAdvanceTimer;
+let editingOpportunityId = null;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -75,17 +76,21 @@ function flattenChecklist(data) {
     ...item,
     sectionId: section.id,
     sectionTitle: section.title,
+    journeyStageId: section.journeyStageId,
   })));
 }
 
 function validateContent() {
   if (!settings?.storageKey || !settings?.privacy?.responsibilityText || !Array.isArray(checklist?.sections)) throw new Error("Configuración incompleta.");
+  if (!Array.isArray(checklist?.journeyStages) || checklist.journeyStages.length !== 5) throw new Error("El Customer Journey debe contener cinco momentos.");
   if (questions.length !== 36) throw new Error(`Se esperaban 36 controles y se encontraron ${questions.length}.`);
   const ids = new Set(questions.map((item) => item.id));
+  const stageIds = new Set(checklist.journeyStages.map((stage) => stage.id));
   if (ids.size !== questions.length) throw new Error("Existen controles duplicados.");
   questions.forEach((item, index) => {
     if (item.id !== `q${String(index + 1).padStart(2, "0")}`) throw new Error(`Orden inválido en ${item.id}.`);
     if (!item.question || !item.title || !item.applies) throw new Error(`Control incompleto: ${item.id}.`);
+    if (!stageIds.has(item.journeyStageId)) throw new Error(`Momento de Customer Journey inválido: ${item.id}.`);
     if (!correctionActionFor(item)) throw new Error(`Falta corrección inmediata: ${item.id}.`);
   });
 }
@@ -111,14 +116,18 @@ function bindEvents() {
   dom.commentInput.addEventListener("input", handleComment);
   dom.previousButton.addEventListener("click", previousQuestion);
   dom.nextButton.addEventListener("click", nextQuestion);
-  dom.backToStart.addEventListener("click", () => showView("start"));
+  dom.backToStart.addEventListener("click", () => {
+    editingOpportunityId = null;
+    showView("start");
+  });
   dom.referenceButton.addEventListener("click", openImageDialog);
   dom.closeImageDialog.addEventListener("click", () => dom.imageDialog.close());
   dom.imageDialog.addEventListener("click", (event) => {
     if (event.target === dom.imageDialog) dom.imageDialog.close();
   });
   dom.applyCorrection.addEventListener("click", applySuggestedCorrection);
-  dom.printReport.addEventListener("click", () => window.print());
+  dom.printReport.addEventListener("click", exportSummaryPdf);
+  dom.opportunitiesList.addEventListener("click", handleOpportunityEdit);
   dom.restartButton.addEventListener("click", restartValidation);
   dom.clearLocalData.addEventListener("click", clearSavedValidation);
   dom.sectionRail.addEventListener("click", handleSectionJump);
@@ -216,7 +225,9 @@ function renderQuestion() {
   const item = questions[state.currentIndex];
   const answer = state.answers[item.id] || { status: null, comment: "" };
   const number = state.currentIndex + 1;
-  dom.sectionLabel.textContent = item.sectionTitle;
+  const editingOpportunity = editingOpportunityId === item.id;
+  const stage = journeyStageFor(item);
+  dom.sectionLabel.textContent = `${stage?.title || "Recorrido"} · ${item.sectionTitle}`;
   dom.questionCounter.textContent = `Pregunta ${number} de ${questions.length}`;
   dom.questionNumber.textContent = String(number).padStart(2, "0");
   dom.questionTitle.textContent = item.title;
@@ -244,8 +255,11 @@ function renderQuestion() {
   dom.commentInput.value = answer.comment || "";
   updateCommentUi(answer.status);
   renderResponseGuidance(answer.status);
-  dom.previousButton.disabled = state.currentIndex === 0;
-  dom.nextButton.textContent = number === questions.length ? "Terminar recorrido →" : "Guardar y continuar →";
+  dom.previousButton.disabled = editingOpportunity || state.currentIndex === 0;
+  dom.nextButton.textContent = editingOpportunity
+    ? "Guardar ajuste y volver →"
+    : number === questions.length ? "Terminar recorrido →" : "Guardar y continuar →";
+  dom.sectionRail.classList.toggle("is-locked", editingOpportunity);
   dom.questionError.textContent = "";
   updateSectionRail();
   updateLiveMetrics();
@@ -387,6 +401,14 @@ function previousQuestion() {
 function nextQuestion() {
   cancelAutoAdvance();
   if (!validateCurrentQuestion(true)) return;
+  if (editingOpportunityId === questions[state.currentIndex].id) {
+    editingOpportunityId = null;
+    state.completedAt = new Date().toISOString();
+    saveState();
+    showSummary();
+    showToast("Acuerdo actualizado en tu ruta de mejora.");
+    return;
+  }
   if (state.currentIndex === questions.length - 1) {
     const invalid = questions.filter((item) => {
       const answer = state.answers[item.id];
@@ -447,7 +469,7 @@ function showSummary() {
   const reading = classifyResult(stats.score);
   dom.resultBadge.textContent = reading.label;
   dom.resultMessage.textContent = reading.message;
-  renderSections();
+  renderJourneyStages();
   renderStrengths();
   renderOpportunities();
   dom.headerStep.textContent = "36 / 36";
@@ -461,17 +483,17 @@ function classifyResult(score) {
   return { label: "ENFOQUE INMEDIATO", message: "Hay una base para avanzar. Atiende primero las correcciones sugeridas y vuelve a validar los puntos prioritarios." };
 }
 
-function renderSections() {
+function renderJourneyStages() {
   dom.sectionResults.replaceChildren();
-  checklist.sections.forEach((section) => {
-    const sectionItems = questions.filter((item) => item.sectionId === section.id);
-    const stats = calculateStats(sectionItems);
+  checklist.journeyStages.forEach((stage) => {
+    const stageItems = questions.filter((item) => item.journeyStageId === stage.id);
+    const stats = calculateStats(stageItems);
     const score = stats.score === null ? 0 : stats.score;
     const row = document.createElement("article");
     row.className = "section-result";
     row.innerHTML = `
       <div>
-        <header><span>${escapeHtml(section.title)}</span><small>${stats.pass} C · ${stats.fail} NC · ${stats.na} N/A</small></header>
+        <header><span>${escapeHtml(stage.title)} <em>${escapeHtml(stage.subtitle)}</em></span><small>${stats.pass} C · ${stats.fail} NC · ${stats.na} N/A</small></header>
         <div class="mini-track"><i style="width:${score}%"></i></div>
       </div>
       <strong>${stats.score === null ? "—" : `${stats.score}%`}</strong>`;
@@ -492,14 +514,16 @@ function renderOpportunities() {
   }
   opportunities.forEach((item) => {
     const answer = state.answers[item.id];
+    const stage = journeyStageFor(item);
     const row = document.createElement("article");
     row.className = "opportunity";
     row.innerHTML = `
       <b>×</b>
       <div>
-        <strong>${escapeHtml(item.title)}</strong>
+        <strong>${escapeHtml(stage?.title || item.sectionTitle)} · ${escapeHtml(item.title)}</strong>
         <p><span>Corrige ahora:</span> ${escapeHtml(correctionActionFor(item))}</p>
-        <small>Seguimiento: ${escapeHtml(answer.comment)}</small>
+        <small><b>Acuerdo:</b> ${escapeHtml(answer.comment)}</small>
+        <button class="opportunity-edit" type="button" data-edit-question="${escapeHtml(item.id)}">Ajustar acuerdo</button>
       </div>
       <span>${escapeHtml(item.applies)}</span>`;
     dom.opportunitiesList.append(row);
@@ -510,12 +534,12 @@ function renderStrengths() {
   const strengths = questions.filter((item) => state.answers[item.id]?.status === STATUS.PASS);
   dom.strengthCount.textContent = strengths.length;
   dom.strengthsList.replaceChildren();
-  checklist.sections.forEach((section) => {
-    const ready = strengths.filter((item) => item.sectionId === section.id);
+  checklist.journeyStages.forEach((stage) => {
+    const ready = strengths.filter((item) => item.journeyStageId === stage.id);
     if (!ready.length) return;
     const row = document.createElement("article");
     row.className = "strength";
-    row.innerHTML = `<b>✓</b><div><strong>${escapeHtml(section.title)}</strong><p>${ready.length} ${ready.length === 1 ? "estándar listo" : "estándares listos"}</p></div>`;
+    row.innerHTML = `<b>✓</b><div><strong>${escapeHtml(stage.title)}</strong><p>${ready.length} ${ready.length === 1 ? "estándar listo" : "estándares listos"}</p></div>`;
     dom.strengthsList.append(row);
   });
   if (!strengths.length) {
@@ -526,9 +550,36 @@ function renderStrengths() {
   }
 }
 
+function handleOpportunityEdit(event) {
+  const button = event.target.closest("[data-edit-question]");
+  if (!button) return;
+  const target = questions.find((item) => item.id === button.dataset.editQuestion);
+  if (!target) return;
+  state.currentIndex = questions.indexOf(target);
+  editingOpportunityId = target.id;
+  state.completedAt = null;
+  saveState();
+  showValidation();
+  requestAnimationFrame(() => {
+    dom.commentInput.focus();
+    dom.commentInput.select();
+  });
+  showToast("Ajusta el acuerdo y continúa. La oportunidad se conservará en el resumen.");
+}
+
+function exportSummaryPdf() {
+  const originalTitle = document.title;
+  const store = String(state.store || "Tienda").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "Tienda";
+  document.title = `Fall26_${store}_${new Date().toISOString().slice(0, 10)}`;
+  window.print();
+  setTimeout(() => { document.title = originalTitle; }, 1500);
+}
+
 function restartValidation() {
   if (!window.confirm("¿Iniciar una nueva validación? El recorrido guardado se reemplazará.")) return;
   localStorage.removeItem(settings.storageKey);
+  editingOpportunityId = null;
   state = createEmptyState();
   dom.storeInput.value = "";
   dom.validatorInput.value = "";
@@ -618,19 +669,27 @@ function applyExperienceSettings() {
   dom.summaryPrivacyWarning.textContent = privacy.exportWarning;
 }
 
+function journeyStageFor(itemOrId) {
+  const stageId = typeof itemOrId === "string" ? itemOrId : itemOrId?.journeyStageId;
+  return checklist?.journeyStages?.find((stage) => stage.id === stageId) || null;
+}
+
 function renderSectionRail() {
   dom.sectionRail.hidden = !settings.experience?.navigation?.showSectionRail;
   dom.sectionRail.replaceChildren();
-  checklist.sections.forEach((section, index) => {
+  checklist.journeyStages.forEach((stage, index) => {
     const button = document.createElement("button");
     const number = document.createElement("b");
     const label = document.createElement("span");
+    const detail = document.createElement("small");
     button.type = "button";
     button.className = "section-chip";
-    button.dataset.sectionId = section.id;
-    button.title = `Ir a ${section.title}`;
+    button.dataset.stageId = stage.id;
+    button.title = `Ir a ${stage.title}: ${stage.subtitle}`;
     number.textContent = String(index + 1).padStart(2, "0");
-    label.textContent = section.title;
+    label.textContent = stage.title;
+    detail.textContent = stage.subtitle;
+    label.append(detail);
     button.append(number, label);
     dom.sectionRail.append(button);
   });
@@ -638,10 +697,10 @@ function renderSectionRail() {
 
 function updateSectionRail() {
   const current = questions[state.currentIndex];
-  dom.sectionRail.querySelectorAll("[data-section-id]").forEach((button) => {
-    const items = questions.filter((item) => item.sectionId === button.dataset.sectionId);
+  dom.sectionRail.querySelectorAll("[data-stage-id]").forEach((button) => {
+    const items = questions.filter((item) => item.journeyStageId === button.dataset.stageId);
     const complete = items.every((item) => state.answers[item.id]?.status);
-    const active = current.sectionId === button.dataset.sectionId;
+    const active = current.journeyStageId === button.dataset.stageId;
     button.classList.toggle("is-complete", complete);
     button.classList.toggle("is-active", active);
     if (active) button.setAttribute("aria-current", "step");
@@ -653,15 +712,20 @@ function updateSectionRail() {
 
 function handleSectionJump(event) {
   cancelAutoAdvance();
-  const button = event.target.closest("[data-section-id]");
+  const button = event.target.closest("[data-stage-id]");
   if (!button || !settings.experience?.navigation?.allowSectionJump) return;
+  if (editingOpportunityId) {
+    showToast("Guarda el ajuste para volver al resumen.");
+    dom.commentInput.focus();
+    return;
+  }
   const currentAnswer = state.answers[questions[state.currentIndex].id];
   if (currentAnswer?.status === STATUS.FAIL && !currentAnswer.comment.trim()) {
     dom.questionError.textContent = "Agrega una acción breve antes de cambiar de sección.";
     dom.commentInput.focus();
     return;
   }
-  const items = questions.filter((item) => item.sectionId === button.dataset.sectionId);
+  const items = questions.filter((item) => item.journeyStageId === button.dataset.stageId);
   const target = items.find((item) => !state.answers[item.id]?.status) || items[0];
   state.currentIndex = questions.indexOf(target);
   renderQuestion();
@@ -671,6 +735,7 @@ function handleSectionJump(event) {
 function clearSavedValidation() {
   if (!window.confirm("¿Borrar el recorrido guardado en este dispositivo? Esta acción no se puede deshacer.")) return;
   localStorage.removeItem(settings.storageKey);
+  editingOpportunityId = null;
   state = createEmptyState();
   dom.startForm.reset();
   dom.resumeButton.hidden = true;

@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "validacion-fall26-v4";
+const CACHE_NAME = "validacion-fall26-v5";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,9 @@ const CORE_ASSETS = [
   "./config/settings.json",
   "./data/fall26_checklist.json",
   "./assets/icons/icon.svg",
+  "./assets/icons/apple-touch-icon.png",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png",
   ...[
     "q01", "q02", "q03", "q04", "q05", "q06", "q07", "q09", "q10", "q11", "q12", "q13",
     "q14", "q15", "q16", "q17", "q18", "q19", "q21", "q22", "q23", "q24", "q25", "q26",

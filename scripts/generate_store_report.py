@@ -29,7 +29,7 @@ from reportlab.platypus import (
 
 from scoring import (
     build_execution_insights,
-    build_section_summary,
+    build_journey_summary,
     calculate_counts,
     calculate_score,
     classify_score,
@@ -86,13 +86,43 @@ def parse_date(value: Any) -> str:
         return safe_text(value, 40)
 
 
-def load_corrective_actions() -> dict[str, str]:
+def load_catalog() -> tuple[dict[str, str], dict[str, dict[str, str]], list[dict[str, str]]]:
     with (ROOT / "data" / "fall26_checklist.json").open("r", encoding="utf-8") as stream:
         checklist = json.load(stream)
     actions = checklist.get("guidance", {}).get("correctiveActions", {})
     if not isinstance(actions, dict):
         raise ValueError("El catálogo no contiene correcciones inmediatas válidas.")
-    return {str(key): str(value) for key, value in actions.items()}
+    stages = checklist.get("journeyStages", [])
+    stage_map = {str(stage["id"]): stage for stage in stages}
+    item_map: dict[str, dict[str, str]] = {}
+    for section in checklist.get("sections", []):
+        stage = stage_map.get(str(section.get("journeyStageId")), {})
+        for item in section.get("items", []):
+            item_map[str(item["id"])] = {
+                "sectionId": str(section.get("id") or ""),
+                "sectionTitle": str(section.get("title") or ""),
+                "journeyStageId": str(stage.get("id") or ""),
+                "journeyStageTitle": str(stage.get("title") or ""),
+                "journeyStageSubtitle": str(stage.get("subtitle") or ""),
+                "title": str(item.get("title") or ""),
+                "question": str(item.get("question") or ""),
+                "criterion": str(item.get("criterion") or ""),
+                "applies": str(item.get("applies") or ""),
+            }
+    return (
+        {str(key): str(value) for key, value in actions.items()},
+        item_map,
+        [{str(key): str(value) for key, value in stage.items()} for stage in stages],
+    )
+
+
+def enrich_answers(answers: list[dict[str, Any]], catalog: dict[str, dict[str, str]]) -> list[dict[str, Any]]:
+    enriched = []
+    for answer in answers:
+        normalized = dict(catalog.get(str(answer.get("id") or ""), {}))
+        normalized.update(answer)
+        enriched.append(normalized)
+    return enriched
 
 
 def header_footer(canvas, doc) -> None:
@@ -151,13 +181,41 @@ def kpi_card(value: str, label: str, styles: dict[str, ParagraphStyle], color=CR
     return table
 
 
+def journey_card(stage: dict[str, Any], styles: dict[str, ParagraphStyle]) -> Table:
+    counts = stage.get("counts") or {}
+    score = stage.get("score")
+    score_text = "-" if score is None else f"{float(score):.0f}%"
+    detail = f"{counts.get('cumple', 0)} C · {counts.get('no_cumple', 0)} NC · {counts.get('na', 0)} N/A"
+    accent = GREEN if score is not None and score >= 90 else ORANGE if score is not None and score >= 75 else RED if score is not None else MUTED
+    card = Table([
+        [Paragraph(safe_text(stage.get("title"), 22), styles["kpi_label"])],
+        [Paragraph(score_text, styles["kpi"])],
+        [Paragraph(detail, styles["kpi_label"])],
+    ], colWidths=[34.8 * mm], rowHeights=[6 * mm, 10 * mm, 6 * mm])
+    card.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FFFDF8")),
+        ("BOX", (0, 0), (-1, -1), .75, colors.HexColor("#D8CBB8")),
+        ("LINEABOVE", (0, 0), (-1, 0), 2.2, accent),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 2), ("RIGHTPADDING", (0, 0), (-1, -1), 2),
+        ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+    ]))
+    return card
+
+
 def build_report(payload: dict[str, Any], output_path: Path) -> None:
-    answers = payload["answers"]
+    corrective_actions, catalog, stage_definitions = load_catalog()
+    answers = enrich_answers(payload["answers"], catalog)
     counts = calculate_counts(answers)
     score = calculate_score(counts)
     label, message = classify_score(score)
-    sections = payload.get("sections") or payload.get("summary", {}).get("sections") or build_section_summary(answers)
-    insights = build_execution_insights(answers, load_corrective_actions())
+    stages = build_journey_summary(answers)
+    stage_result_map = {stage["id"]: stage for stage in stages}
+    stages = [stage_result_map.get(stage["id"], {
+        "id": stage["id"], "title": stage["title"], "subtitle": stage["subtitle"],
+        "score": None, "counts": {"cumple": 0, "no_cumple": 0, "na": 0, "respondidas": 0},
+    }) for stage in stage_definitions]
+    insights = build_execution_insights(answers, corrective_actions)
     strengths = insights["strengths"]
     opportunities = insights["opportunities"]
     styles = build_styles()
@@ -235,44 +293,34 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
         ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
     ]))
-    story += [result, Spacer(1, 3 * mm), recognition, Spacer(1, 5 * mm), Paragraph("Resultado por bloque", styles["section"])]
+    story += [result, Spacer(1, 3 * mm), recognition, Spacer(1, 5 * mm), Paragraph("Customer Journey", styles["section"])]
 
-    section_rows = [["Bloque", "Cumple", "No cumple", "N/A", "Resultado"]]
-    for section in sections:
-        scounts = section.get("counts") or {
-            "cumple": section.get("pass", 0),
-            "no_cumple": section.get("fail", 0),
-            "na": section.get("na", 0),
-        }
-        sscore = section.get("score")
-        section_rows.append([
-            safe_text(section.get("title"), 60), str(scounts.get("cumple", 0)), str(scounts.get("no_cumple", 0)),
-            str(scounts.get("na", 0)), "-" if sscore is None else f"{float(sscore):.1f}%",
-        ])
-    section_table = Table(section_rows, colWidths=[82 * mm, 24 * mm, 26 * mm, 18 * mm, 27 * mm], repeatRows=1)
-    section_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), DARK), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTNAME", (0, 0), (-1, 0), BOLD), ("FONTNAME", (0, 1), (-1, -1), REGULAR),
-        ("FONTSIZE", (0, 0), (-1, -1), 7.5), ("ALIGN", (1, 0), (-1, -1), "CENTER"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F4F7F5")]),
-        ("GRID", (0, 0), (-1, -1), .35, colors.HexColor("#C8D4CF")), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING", (0, 0), (-1, -1), 3.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
+    journey = Table(
+        [[journey_card(stage, styles) for stage in stages]],
+        colWidths=[doc.width / 5] * 5,
+    )
+    journey.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 2), ("RIGHTPADDING", (0, 0), (-1, -1), 2),
     ]))
-    story += [section_table, Spacer(1, 6 * mm), Paragraph(f"Acciones inmediatas ({len(opportunities)})", styles["section"])]
+    story += [journey, Spacer(1, 5 * mm), Paragraph(f"Ruta de mejora ({len(opportunities)})", styles["section"])]
+    story.append(Paragraph("Cada oportunidad conserva el acuerdo registrado para corregir, asignar y volver a validar.", styles["warm"]))
+    story.append(Spacer(1, 2 * mm))
 
     if not opportunities:
         story.append(Paragraph("No se registraron puntos NO CUMPLE. Celebra el resultado, mantén el estándar y reconoce al equipo.", styles["body"]))
     else:
-        opportunity_rows = [["#", "Punto", "Corrige ahora", "Seguimiento"]]
+        opportunity_rows = [["#", "Momento y punto", "Corrige ahora", "Acuerdo y cierre"]]
         for number, answer in enumerate(opportunities, start=1):
+            stage_label = safe_text(answer.get("journeyStageTitle") or answer.get("sectionTitle"), 30)
+            agreement = safe_text(answer.get("comment"), 120)
             opportunity_rows.append([
                 str(number),
-                Paragraph(f"<b>{safe_text(answer.get('title'), 70)}</b><br/><font color='#D94F1D'>{safe_text(answer.get('applies'), 25)}</font>", styles["small"]),
+                Paragraph(f"<font color='#006241'><b>{stage_label}</b></font><br/><b>{safe_text(answer.get('title'), 70)}</b><br/><font color='#D94F1D'>{safe_text(answer.get('applies'), 25)}</font>", styles["small"]),
                 Paragraph(safe_text(answer.get("suggestedAction"), 190), styles["small"]),
-                Paragraph(safe_text(answer.get("comment"), 120), styles["small"]),
+                Paragraph(f"<b>Acuerdo:</b> {agreement}<br/><br/><font color='#5F6F69'>Responsable: __________<br/>Fecha: ____ / ____</font>", styles["small"]),
             ])
-        opportunities_table = Table(opportunity_rows, colWidths=[9 * mm, 45 * mm, 75 * mm, 48 * mm], repeatRows=1)
+        opportunities_table = Table(opportunity_rows, colWidths=[9 * mm, 43 * mm, 70 * mm, 55 * mm], repeatRows=1)
         opportunities_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), ORANGE), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTNAME", (0, 0), (-1, 0), BOLD), ("FONTSIZE", (0, 0), (-1, -1), 7.3),

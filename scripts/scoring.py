@@ -78,6 +78,29 @@ def build_section_summary(answers: Iterable[dict[str, Any]]) -> list[dict[str, A
     return result
 
 
+def build_journey_summary(answers: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Resume el resultado por momento del Customer Journey, conservando el orden recibido."""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    titles: dict[str, str] = {}
+    subtitles: dict[str, str] = {}
+    for answer in answers:
+        stage_id = str(answer.get("journeyStageId") or "sin_momento")
+        grouped.setdefault(stage_id, []).append(answer)
+        titles[stage_id] = str(answer.get("journeyStageTitle") or stage_id)
+        subtitles[stage_id] = str(answer.get("journeyStageSubtitle") or "")
+    result = []
+    for stage_id, stage_answers in grouped.items():
+        counts = calculate_counts(stage_answers)
+        result.append({
+            "id": stage_id,
+            "title": titles[stage_id],
+            "subtitle": subtitles[stage_id],
+            "score": calculate_score(counts),
+            "counts": counts,
+        })
+    return result
+
+
 def validate_answers(answers: Iterable[dict[str, Any]]) -> None:
     seen_ids: set[str] = set()
     for index, answer in enumerate(answers, start=1):

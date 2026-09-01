@@ -50,9 +50,37 @@
       "q36": "Reemplaza los parámetros vencidos y confirma vida secundaria, almacenamiento y manejo."
     }
   },
+  "journeyStages": [
+    {
+      "id": "prepara",
+      "title": "Prepara",
+      "subtitle": "Listos antes de abrir"
+    },
+    {
+      "id": "llega",
+      "title": "Llega",
+      "subtitle": "Entrada y primera impresión"
+    },
+    {
+      "id": "elige",
+      "title": "Elige",
+      "subtitle": "Pantallas, POS y café"
+    },
+    {
+      "id": "vive",
+      "title": "Vive",
+      "subtitle": "Merch, entrega y Drive Thru"
+    },
+    {
+      "id": "disfruta",
+      "title": "Disfruta",
+      "subtitle": "Food, orden y parámetros"
+    }
+  ],
   "sections": [
     {
       "id": "preparacion",
+      "journeyStageId": "prepara",
       "title": "Preparación y fechas",
       "description": "Acciones controlables antes de abrir la campaña.",
       "items": [
@@ -96,6 +124,7 @@
     },
     {
       "id": "entrada",
+      "journeyStageId": "llega",
       "title": "Entrada",
       "description": "Primera impresión y materiales con vigencia correcta.",
       "items": [
@@ -137,6 +166,7 @@
     },
     {
       "id": "pantallas",
+      "journeyStageId": "elige",
       "title": "Pantallas y punto de venta",
       "description": "El recorrido siempre inicia con bebidas desde Showcase.",
       "items": [
@@ -180,6 +210,7 @@
     },
     {
       "id": "pos",
+      "journeyStageId": "elige",
       "title": "POS y comunicación",
       "description": "Material visible acorde con fecha, formato y ubicación.",
       "items": [
@@ -223,6 +254,7 @@
     },
     {
       "id": "cafe",
+      "journeyStageId": "elige",
       "title": "Café y equipo",
       "description": "Identificación correcta y conversación operativa.",
       "items": [
@@ -264,6 +296,7 @@
     },
     {
       "id": "merch",
+      "journeyStageId": "vive",
       "title": "Merch y espacios",
       "description": "Orden visual y materiales autorizados.",
       "items": [
@@ -307,6 +340,7 @@
     },
     {
       "id": "contacto",
+      "journeyStageId": "vive",
       "title": "Contacto y Drive Thru",
       "description": "Puntos visibles durante el recorrido del cliente.",
       "items": [
@@ -350,6 +384,7 @@
     },
     {
       "id": "food_exhibicion",
+      "journeyStageId": "disfruta",
       "title": "Food · Exhibición",
       "description": "Modelo correcto, tabla vigente y oferta completa.",
       "items": [
@@ -393,6 +428,7 @@
     },
     {
       "id": "food_control",
+      "journeyStageId": "disfruta",
       "title": "Food · Control",
       "description": "Precio, orden, parámetros y disponibilidad.",
       "items": [

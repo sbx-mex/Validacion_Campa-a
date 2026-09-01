@@ -26,6 +26,7 @@
       "heroPromise": "Un recorrido cercano para reconocer al equipo, corregir en el momento y vivir Fall en cada detalle."
     },
     "navigation": {
+      "style": "customer_journey",
       "showSectionRail": true,
       "allowSectionJump": true,
       "keyboardShortcuts": true,
@@ -33,6 +34,11 @@
       "autoAdvanceStatuses": ["cumple", "na"],
       "autoAdvanceDelayMs": 650,
       "scrollBehavior": "smooth"
+    },
+    "ios": {
+      "standalone": true,
+      "minimumTouchTarget": 48,
+      "safeArea": true
     }
   },
   "statuses": {
