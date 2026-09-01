@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#003b2d">
+  <meta name="description" content="Validación ejecutiva de campaña Fall 26 para operación en tienda.">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+  <title>Validación Campaña · Fall 26</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Saltar al contenido</a>
+
+  <div class="privacy-bar" role="note">
+    <span aria-hidden="true">●</span>
+    <strong>USO INTERNO</strong>
+    <span>Información privada de la compañía · Prohibida su divulgación</span>
+  </div>
+
+  <header class="app-header">
+    <div class="brand-mark" aria-hidden="true"><i></i><i></i><b></b></div>
+    <div class="brand-copy">
+      <span class="eyebrow">JUNTÉMONOS MÁS</span>
+      <h1>Validación Campaña</h1>
+      <p>Fall 26</p>
+    </div>
+    <div id="headerProgress" class="header-progress" hidden>
+      <span id="headerStep">0 / 36</span>
+      <strong id="headerScore">—</strong>
+      <small>Tasa de éxito</small>
+    </div>
+  </header>
+
+  <main id="mainContent" class="app-main">
+    <section id="startView" class="view start-view" aria-labelledby="startTitle">
+      <div class="hero-card">
+        <div class="hero-art" aria-hidden="true">
+          <img src="assets/reference/q05.webp" alt="">
+          <span>Referencia oficial · Aboards Fall</span>
+        </div>
+        <div class="hero-copy">
+          <span class="campaign-pill">ARRANQUE FALL 26</span>
+          <h2 id="startTitle">Un recorrido.<br>Decisiones claras.</h2>
+          <p>Valida los puntos controlables de la campaña y termina con una lectura ejecutiva de oportunidades.</p>
+          <div class="hero-metrics" aria-label="Alcance del recorrido">
+            <div><strong>36</strong><span>controles</span></div>
+            <div><strong>9</strong><span>secciones</span></div>
+            <div><strong>25–30</strong><span>minutos</span></div>
+          </div>
+        </div>
+      </div>
+
+      <form id="startForm" class="start-form" novalidate>
+        <div class="form-heading">
+          <span class="step-dot">1</span>
+          <div><h3>Antes de comenzar</h3><p>Completa únicamente estos dos datos.</p></div>
+        </div>
+        <div class="identity-grid">
+          <label>
+            <span>Tienda</span>
+            <input id="storeInput" name="store" maxlength="80" autocomplete="organization" placeholder="Nombre o número de tienda" required>
+          </label>
+          <label>
+            <span>Quién valida</span>
+            <input id="validatorInput" name="validator" maxlength="80" autocomplete="name" placeholder="Nombre del responsable" required>
+          </label>
+        </div>
+        <label class="privacy-confirm">
+          <input id="privacyConfirm" type="checkbox" required>
+          <span>Usaré esta información únicamente para la validación interna de la tienda.</span>
+        </label>
+        <div class="start-actions">
+          <button class="primary-button" type="submit">Iniciar recorrido <span aria-hidden="true">→</span></button>
+          <button id="resumeButton" class="secondary-button" type="button" hidden>Continuar recorrido guardado</button>
+        </div>
+        <p id="startError" class="form-error" role="alert" aria-live="polite"></p>
+      </form>
+
+      <section class="how-it-works" aria-labelledby="howTitle">
+        <h3 id="howTitle">Tres decisiones. Sin interpretación.</h3>
+        <div class="status-explainer">
+          <article class="status-card status-pass"><b>✓</b><span><strong>Cumple</strong><small>Suma 1 punto</small></span></article>
+          <article class="status-card status-fail"><b>×</b><span><strong>No cumple</strong><small>Suma 0 puntos</small></span></article>
+          <article class="status-card status-na"><b>•</b><span><strong>No aplica</strong><small>No pondera</small></span></article>
+        </div>
+      </section>
+    </section>
+
+    <section id="validationView" class="view validation-view" hidden aria-live="polite">
+      <div class="journey-strip">
+        <button id="backToStart" class="icon-button" type="button" aria-label="Volver al inicio">←</button>
+        <div class="journey-meta">
+          <span id="sectionLabel">Sección</span>
+          <strong id="questionCounter">Pregunta 1 de 36</strong>
+        </div>
+        <div class="journey-score">
+          <strong id="liveScore">—</strong>
+          <span>Éxito</span>
+        </div>
+      </div>
+      <div class="progress-track" aria-hidden="true"><i id="progressBar"></i></div>
+
+      <article id="questionCard" class="question-card">
+        <div class="question-topline">
+          <span id="questionNumber" class="question-number">01</span>
+          <div class="question-heading">
+            <span id="questionTitle" class="question-kicker">Punto a validar</span>
+            <span id="appliesBadge" class="date-badge">ARRANQUE</span>
+          </div>
+        </div>
+
+        <button id="referenceButton" class="reference-frame" type="button" aria-label="Ampliar referencia visual" hidden>
+          <img id="referenceImage" src="" alt="">
+          <span>Ampliar referencia</span>
+        </button>
+
+        <div id="noImageCue" class="no-image-cue" hidden>
+          <span aria-hidden="true">◎</span>
+          <strong>Valida en tienda</strong>
+          <small>Este punto se confirma observando la ejecución real.</small>
+        </div>
+
+        <div class="question-copy">
+          <h2 id="questionText">¿Pregunta?</h2>
+          <p id="criterionText">Criterio observable.</p>
+        </div>
+
+        <fieldset id="statusOptions" class="status-options">
+          <legend>Selecciona una opción</legend>
+          <button class="choice choice-pass" type="button" data-status="cumple"><b>✓</b><span>Cumple<small>1 punto</small></span></button>
+          <button class="choice choice-fail" type="button" data-status="no_cumple"><b>×</b><span>No cumple<small>0 puntos</small></span></button>
+          <button class="choice choice-na" type="button" data-status="na"><b>•</b><span>No aplica<small>No pondera</small></span></button>
+        </fieldset>
+
+        <label id="commentWrap" class="comment-wrap">
+          <span>Comentario breve <small id="commentHint">opcional</small></span>
+          <div class="comment-field">
+            <input id="commentInput" maxlength="120" placeholder="Ej. retirar material anterior">
+            <small id="commentCount">0/120</small>
+          </div>
+        </label>
+      </article>
+
+      <nav class="question-nav" aria-label="Navegación de preguntas">
+        <button id="previousButton" class="secondary-button" type="button">← Anterior</button>
+        <button id="nextButton" class="primary-button" type="button">Siguiente →</button>
+      </nav>
+      <p id="questionError" class="form-error centered" role="alert" aria-live="polite"></p>
+    </section>
+
+    <section id="summaryView" class="view summary-view" hidden aria-labelledby="summaryTitle">
+      <div class="summary-hero">
+        <div>
+          <span class="campaign-pill">RECORRIDO COMPLETADO</span>
+          <h2 id="summaryTitle">Resultado de campaña</h2>
+          <p><strong id="summaryStore">Tienda</strong> · Validó <span id="summaryValidator">Responsable</span></p>
+        </div>
+        <div id="scoreRing" class="score-ring" style="--score:0">
+          <strong id="summaryScore">0%</strong>
+          <span>Tasa de éxito</span>
+        </div>
+      </div>
+
+      <div class="summary-kpis">
+        <article><span class="kpi-icon pass">✓</span><div><strong id="passCount">0</strong><small>Cumple</small></div></article>
+        <article><span class="kpi-icon fail">×</span><div><strong id="failCount">0</strong><small>No cumple</small></div></article>
+        <article><span class="kpi-icon na">•</span><div><strong id="naCount">0</strong><small>No aplica</small></div></article>
+        <article><span class="kpi-icon neutral">◎</span><div><strong id="answeredCount">36</strong><small>Validados</small></div></article>
+      </div>
+
+      <section class="summary-panel" aria-labelledby="readingTitle">
+        <div class="panel-heading"><div><span>LECTURA EJECUTIVA</span><h3 id="readingTitle">¿Dónde enfocar?</h3></div><span id="resultBadge" class="result-badge">—</span></div>
+        <p id="resultMessage" class="result-message"></p>
+        <div id="sectionResults" class="section-results"></div>
+      </section>
+
+      <section class="summary-panel" aria-labelledby="opportunitiesTitle">
+        <div class="panel-heading"><div><span>MEJORA CONTINUA</span><h3 id="opportunitiesTitle">Oportunidades detectadas</h3></div><strong id="opportunityCount">0</strong></div>
+        <div id="opportunitiesList" class="opportunities-list"></div>
+      </section>
+
+      <div class="summary-actions">
+        <button id="downloadJson" class="primary-button" type="button">Descargar JSON</button>
+        <button id="printReport" class="secondary-button" type="button">Guardar resumen PDF</button>
+        <button id="restartButton" class="text-button" type="button">Nueva validación</button>
+      </div>
+      <p class="python-note">El JSON descargado puede convertirse en PDF ejecutivo con <code>python scripts/generate_store_report.py</code>.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div><strong>JUNTÉMONOS</strong><em>más</em></div>
+    <p>Validación Campaña · Fall 26</p>
+    <small>Información privada de la compañía. Uso exclusivo para operación.</small>
+  </footer>
+
+  <dialog id="imageDialog" class="image-dialog">
+    <button id="closeImageDialog" class="dialog-close" type="button" aria-label="Cerrar imagen">×</button>
+    <img id="dialogImage" src="" alt="">
+    <div><strong id="dialogTitle"></strong><span id="dialogDate"></span></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript>Esta herramienta requiere JavaScript para realizar la validación y calcular la tasa de éxito.</noscript>
+</body>
+</html>

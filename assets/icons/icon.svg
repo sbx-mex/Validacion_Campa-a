@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Validación Fall 26">
+  <rect width="512" height="512" rx="112" fill="#003b2d"/>
+  <circle cx="256" cy="256" r="164" fill="#f7f1e7"/>
+  <path d="M181 273c27 0 46-20 46-51v-48h105v48c0 31 19 51 46 51v34c-27 0-46 20-46 51v20H227v-20c0-31-19-51-46-51z" fill="#006241"/>
+  <path d="M140 178c52 4 82 29 90 74-46-7-76-30-90-74zm232 0c-52 4-82 29-90 74 46-7 76-30 90-74z" fill="#d96f1d"/>
+  <path d="m215 279 28 29 59-68" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="25"/>
+</svg>

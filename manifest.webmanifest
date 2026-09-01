@@ -1,0 +1,19 @@
+{
+  "name": "Validación Campaña · Fall 26",
+  "short_name": "Validación Fall",
+  "description": "Recorrido interno de validación operativa para la campaña Fall 26.",
+  "lang": "es-MX",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f1e7",
+  "theme_color": "#003b2d",
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

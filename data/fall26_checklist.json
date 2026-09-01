@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "campaign": "Fall 26",
+  "title": "Validación Campaña",
+  "expectedMinutes": "25–30",
+  "privateNotice": "Información privada de la compañía. Uso exclusivo para validación operativa. Prohibida su divulgación.",
+  "scoreRule": "Cumple / (Cumple + No cumple) × 100. No aplica no pondera.",
+  "sections": [
+    {
+      "id": "preparacion",
+      "title": "Preparación y fechas",
+      "description": "Acciones controlables antes de abrir la campaña.",
+      "items": [
+        {
+          "id": "q01",
+          "title": "Tabla nueva de madera",
+          "question": "¿Sólo se utiliza la nueva tabla de madera con logotipo Starbucks grabado?",
+          "criterion": "Retira el modelo anterior; conserva para CT únicamente las piezas en buen estado.",
+          "applies": "1 SEP",
+          "image": "assets/reference/q01.webp",
+          "imageAlt": "Nueva tabla de madera con logotipo Starbucks grabado"
+        },
+        {
+          "id": "q02",
+          "title": "Vaso verde México 2026",
+          "question": "¿El vaso verde está disponible y en uso desde el arranque Fall?",
+          "criterion": "Ingresa con el mismo código del vaso core; es un artículo normalizado.",
+          "applies": "1 SEP",
+          "image": "assets/reference/q02.webp",
+          "imageAlt": "Vaso verde Starbucks México 2026"
+        },
+        {
+          "id": "q03",
+          "title": "Colombia Nariño",
+          "question": "¿Se resguardó del 1 al 6 y se ofrece como Café del Día desde el 7 de septiembre?",
+          "criterion": "Identificación operativa: COD Colombia N.",
+          "applies": "7 SEP"
+        },
+        {
+          "id": "q04",
+          "title": "Promoplanner y Delivery",
+          "question": "¿El equipo conoce el acceso Fall y las categorías vigentes de Delivery?",
+          "criterion": "Valida acceso y conocimiento; no exhibas contraseñas.",
+          "applies": "1 SEP"
+        }
+      ]
+    },
+    {
+      "id": "entrada",
+      "title": "Entrada",
+      "description": "Primera impresión y materiales con vigencia correcta.",
+      "items": [
+        {
+          "id": "q05",
+          "title": "Aboards · primera vigencia",
+          "question": "¿Lado A muestra Llegó Pumpkin Spice y lado B Aerocano Summer?",
+          "criterion": "Este acomodo aplica exclusivamente el 1 y 2 de septiembre.",
+          "applies": "1–2 SEP",
+          "image": "assets/reference/q05.webp",
+          "imageAlt": "Aboards para el 1 y 2 de septiembre"
+        },
+        {
+          "id": "q06",
+          "title": "Aboards · segunda vigencia",
+          "question": "¿Lado A muestra Hola Pumpkin y lado B Llegó Pumpkin Spice?",
+          "criterion": "Aplica desde el 3 de septiembre.",
+          "applies": "DESDE 3 SEP",
+          "image": "assets/reference/q06.webp",
+          "imageAlt": "Aboards desde el 3 de septiembre"
+        },
+        {
+          "id": "q07",
+          "title": "Ventanas Peanuts™",
+          "question": "¿Los electrostáticos están completos, lisos y en la posición indicada?",
+          "criterion": "Sólo tiendas con puerta y ventanas.",
+          "applies": "DESDE 3 SEP",
+          "image": "assets/reference/q07.webp",
+          "imageAlt": "Layout de electrostáticos Peanuts para ventanas"
+        },
+        {
+          "id": "q08",
+          "title": "Limpieza de entrada",
+          "question": "¿La entrada está limpia y sin comunicación anterior o piezas adicionales?",
+          "criterion": "Debe permanecer únicamente material Fall vigente.",
+          "applies": "ARRANQUE"
+        }
+      ]
+    },
+    {
+      "id": "pantallas",
+      "title": "Pantallas y punto de venta",
+      "description": "El recorrido siempre inicia con bebidas desde Showcase.",
+      "items": [
+        {
+          "id": "q09",
+          "title": "Layout vertical",
+          "question": "¿La primera pantalla visible desde Showcase inicia con bebidas?",
+          "criterion": "La pantalla de precios queda más cercana al Showcase.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q09.webp",
+          "imageAlt": "Layout vertical de pantallas"
+        },
+        {
+          "id": "q10",
+          "title": "Layout horizontal",
+          "question": "¿El extremo del Showcase inicia con bebidas, sin importar el flujo de entrada?",
+          "criterion": "La orientación de la tienda no cambia esta regla.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q10.webp",
+          "imageAlt": "Layout horizontal de pantallas"
+        },
+        {
+          "id": "q11",
+          "title": "Menú encapsulado",
+          "question": "¿El menú de mano está actualizado, encapsulado, limpio y disponible?",
+          "criterion": "Incluye precios, calorías y proteína cuando aplique.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q11.webp",
+          "imageAlt": "Menú de mano encapsulado"
+        },
+        {
+          "id": "q12",
+          "title": "Exhibidor Casa Merch",
+          "question": "¿El exhibidor Peanuts™ está armado y muestra entre 3 y 4 piezas?",
+          "criterion": "No aplica a kioscos ni aeropuertos.",
+          "applies": "DESDE 21 SEP",
+          "image": "assets/reference/q12.webp",
+          "imageAlt": "Exhibidor Casa Merch Peanuts"
+        }
+      ]
+    },
+    {
+      "id": "pos",
+      "title": "POS y comunicación",
+      "description": "Material visible acorde con fecha, formato y ubicación.",
+      "items": [
+        {
+          "id": "q13",
+          "title": "Copetes Cold Foam",
+          "question": "¿Los copetes Pumpkin Cold Foam están completos y visibles?",
+          "criterion": "Retira cualquier material anterior.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q13.webp",
+          "imageAlt": "Copetes Pumpkin Cold Foam"
+        },
+        {
+          "id": "q14",
+          "title": "Copete POS VPMC",
+          "question": "¿El copete VPMC y el speech partner se utilizan sólo durante su vigencia?",
+          "criterion": "Inicio: 1 de octubre. Cierre: 2 de noviembre.",
+          "applies": "1 OCT–2 NOV",
+          "image": "assets/reference/q14.webp",
+          "imageAlt": "Copete POS VPMC"
+        },
+        {
+          "id": "q15",
+          "title": "Rewards y cenefas",
+          "question": "¿La cenefa instalada corresponde a la promoción y fecha vigentes?",
+          "criterion": "Sin promoción activa, utiliza la cenefa genérica.",
+          "applies": "SEGÚN PROMO"
+        },
+        {
+          "id": "q16",
+          "title": "Posters Fall",
+          "question": "¿Los posters están completos y sólo en tiendas con marco en pared o muro?",
+          "criterion": "No improvises ubicaciones fuera del marco autorizado.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q16.webp",
+          "imageAlt": "Posters de campaña Fall"
+        }
+      ]
+    },
+    {
+      "id": "cafe",
+      "title": "Café y equipo",
+      "description": "Identificación correcta y conversación operativa.",
+      "items": [
+        {
+          "id": "q17",
+          "title": "BUNN",
+          "question": "¿BUNN tiene el café y la identificación correctos para Fall?",
+          "criterion": "Retira identificadores anteriores.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q17.webp",
+          "imageAlt": "Acomodo Fall en BUNN"
+        },
+        {
+          "id": "q18",
+          "title": "Mastrena",
+          "question": "¿Los imanes coinciden con el café cargado y el layout de la máquina?",
+          "criterion": "Valida configuración Mastrena 1 o Mastrena 2.0.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q18.webp",
+          "imageAlt": "Acomodo de imanes en Mastrena"
+        },
+        {
+          "id": "q19",
+          "title": "Second choice Blonde",
+          "question": "¿Café Blonde está disponible como opción Core y sin costo?",
+          "criterion": "Mantén pedido y disponibilidad en Mastrena.",
+          "applies": "CORE"
+        },
+        {
+          "id": "q20",
+          "title": "Second choice 1971",
+          "question": "¿1971 está colocado y el equipo conoce los cargos correspondientes?",
+          "criterion": "Cambio: $5.00. Shot adicional: $12.00.",
+          "applies": "ARRANQUE"
+        }
+      ]
+    },
+    {
+      "id": "merch",
+      "title": "Merch y espacios",
+      "description": "Orden visual y materiales autorizados.",
+      "items": [
+        {
+          "id": "q21",
+          "title": "Canastas",
+          "question": "¿Canasta 1 contiene 1971 Roast y canasta 2 composta?",
+          "criterion": "Presentación limpia, completa y ordenada.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q21.webp",
+          "imageAlt": "Acomodo de canastas Fall"
+        },
+        {
+          "id": "q22",
+          "title": "Mueble Merch",
+          "question": "¿El mueble conserva únicamente el layout y materiales Fall?",
+          "criterion": "Sin comunicación anterior ni piezas adicionales.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q22.webp",
+          "imageAlt": "Layout de mueble Merch Fall"
+        },
+        {
+          "id": "q23",
+          "title": "Community Board",
+          "question": "¿Está limpio, ordenado y con información Fall vigente?",
+          "criterion": "Cada sección debe ser relevante para clientes y partners.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q23.webp",
+          "imageAlt": "Community Board Fall"
+        },
+        {
+          "id": "q24",
+          "title": "Condiment · CDMX",
+          "question": "¿La tienda sin Community Board utiliza el layout SEDEMA en Condiment?",
+          "criterion": "No aplica fuera de CDMX o cuando existe Community Board.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q24.webp",
+          "imageAlt": "Layout SEDEMA en mueble Condiment"
+        }
+      ]
+    },
+    {
+      "id": "contacto",
+      "title": "Contacto y Drive Thru",
+      "description": "Puntos visibles durante el recorrido del cliente.",
+      "items": [
+        {
+          "id": "q25",
+          "title": "Zona Hand Off",
+          "question": "¿El sticker de encuesta está visible en Hand Off?",
+          "criterion": "Valida adicionales autorizados según formato de tienda.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q25.webp",
+          "imageAlt": "Sticker de encuesta en Hand Off"
+        },
+        {
+          "id": "q26",
+          "title": "BNTK con objetivos",
+          "question": "¿El BNTK está en refrigerador y el equipo conoce sus objetivos?",
+          "criterion": "Evalúa la conversación, no sólo la presencia del material.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q26.webp",
+          "imageAlt": "BNTK con objetivos Fall"
+        },
+        {
+          "id": "q27",
+          "title": "Drive Thru",
+          "question": "¿Menú, premenú y copetes respetan ubicación y vigencia Fall?",
+          "criterion": "No aplica para tiendas sin Drive Thru.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q27.webp",
+          "imageAlt": "Layout Fall de Drive Thru"
+        },
+        {
+          "id": "q28",
+          "title": "Copete bocina DT",
+          "question": "¿El copete de bocina está instalado únicamente durante su vigencia?",
+          "criterion": "No aplica para tiendas sin Drive Thru.",
+          "applies": "15 SEP–31 OCT",
+          "image": "assets/reference/q28.webp",
+          "imageAlt": "Copete de bocina Drive Thru"
+        }
+      ]
+    },
+    {
+      "id": "food_exhibicion",
+      "title": "Food · Exhibición",
+      "description": "Modelo correcto, tabla vigente y oferta completa.",
+      "items": [
+        {
+          "id": "q29",
+          "title": "Tabla de exhibición",
+          "question": "¿La tabla Fall 2026 está disponible y se utiliza para validar cantidades?",
+          "criterion": "La tabla vigente es la única referencia operativa.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q29.webp",
+          "imageAlt": "Tabla de exhibición Fall 2026"
+        },
+        {
+          "id": "q30",
+          "title": "Modelo de exhibidor",
+          "question": "¿La exhibición corresponde al modelo de mueble de la tienda?",
+          "criterion": "Confirma Zephyr refrigerado, Zephyr o Capelo.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q30.webp",
+          "imageAlt": "Modelo de exhibidor de alimentos"
+        },
+        {
+          "id": "q31",
+          "title": "Alzadores",
+          "question": "¿Los alzadores corresponden al layout mostrado para ese exhibidor?",
+          "criterion": "No mezcles acomodo anterior con el nuevo modelo.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q31.webp",
+          "imageAlt": "Layout de alzadores para exhibidor"
+        },
+        {
+          "id": "q32",
+          "title": "Oferta Fall",
+          "question": "¿Los productos nuevos están ubicados sin sustituir familias obligatorias?",
+          "criterion": "Valida disponibilidad, preciadores y presentación.",
+          "applies": "LANZAMIENTO",
+          "image": "assets/reference/q32.webp",
+          "imageAlt": "Oferta de alimentos nuevos Fall"
+        }
+      ]
+    },
+    {
+      "id": "food_control",
+      "title": "Food · Control",
+      "description": "Precio, orden, parámetros y disponibilidad.",
+      "items": [
+        {
+          "id": "q33",
+          "title": "Grab & Go",
+          "question": "¿El layout corresponde al modelo y mantiene oferta con precios visibles?",
+          "criterion": "Ajusta cantidades sin saturar el mueble.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q33.webp",
+          "imageAlt": "Layout Grab and Go"
+        },
+        {
+          "id": "q34",
+          "title": "Dulceros",
+          "question": "¿El formato corresponde a la tienda y conserva oferta, orden y precios?",
+          "criterion": "No retires familias obligatorias.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q34.webp",
+          "imageAlt": "Layout de dulceros Fall"
+        },
+        {
+          "id": "q35",
+          "title": "Parámetros de horneo",
+          "question": "¿Los parámetros están visibles y se aplica el minuto de arte?",
+          "criterion": "Valida tiempo, temperatura, cantidad y resultado.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q35.webp",
+          "imageAlt": "Parámetros de horneo Fall"
+        },
+        {
+          "id": "q36",
+          "title": "Descongelado y listo",
+          "question": "¿Los parámetros están visibles, completos y vigentes?",
+          "criterion": "Confirma vida secundaria, almacenamiento y manejo.",
+          "applies": "ARRANQUE",
+          "image": "assets/reference/q36.webp",
+          "imageAlt": "Parámetros de descongelado y listo para consumo"
+        }
+      ]
+    }
+  ]
+}

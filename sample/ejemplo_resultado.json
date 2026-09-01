@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "project": "Validación Campaña",
+  "campaign": "Fall 26",
+  "privateNotice": "Información privada de la compañía. Uso exclusivo para validación operativa. Prohibida su divulgación.",
+  "store": "Tienda Ejemplo 001",
+  "validator": "Responsable de ejemplo",
+  "startedAt": "2026-09-01T09:00:00-06:00",
+  "completedAt": "2026-09-01T09:27:00-06:00",
+  "scoreRule": "Cumple / (Cumple + No cumple) × 100. No aplica no pondera.",
+  "answers": [
+    {"id": "q01", "sectionId": "preparacion", "sectionTitle": "Preparación y fechas", "title": "Tabla nueva de madera", "question": "¿Sólo se utiliza la nueva tabla de madera con logotipo Starbucks grabado?", "applies": "1 SEP", "status": "cumple", "value": 1, "comment": ""},
+    {"id": "q05", "sectionId": "entrada", "sectionTitle": "Entrada", "title": "Aboards", "question": "¿El material instalado corresponde a la vigencia?", "applies": "SEGÚN FECHA", "status": "no_cumple", "value": 0, "comment": "Cambiar lado B antes de apertura"},
+    {"id": "q09", "sectionId": "pantallas", "sectionTitle": "Pantallas y punto de venta", "title": "Layout de pantallas", "question": "¿La primera pantalla desde Showcase inicia con bebidas?", "applies": "ARRANQUE", "status": "cumple", "value": 1, "comment": ""},
+    {"id": "q13", "sectionId": "pos", "sectionTitle": "POS y comunicación", "title": "Copetes Cold Foam", "question": "¿Los copetes están completos y visibles?", "applies": "ARRANQUE", "status": "cumple", "value": 1, "comment": ""},
+    {"id": "q17", "sectionId": "cafe", "sectionTitle": "Café y equipo", "title": "BUNN", "question": "¿BUNN tiene café e identificación correctos?", "applies": "ARRANQUE", "status": "cumple", "value": 1, "comment": ""},
+    {"id": "q21", "sectionId": "merch", "sectionTitle": "Merch y espacios", "title": "Canastas", "question": "¿El acomodo es correcto?", "applies": "ARRANQUE", "status": "na", "value": null, "comment": "Tienda sin canastas"},
+    {"id": "q25", "sectionId": "contacto", "sectionTitle": "Contacto y Drive Thru", "title": "Hand Off", "question": "¿La comunicación es visible?", "applies": "ARRANQUE", "status": "cumple", "value": 1, "comment": ""},
+    {"id": "q29", "sectionId": "food", "sectionTitle": "Exhibición de alimentos", "title": "Tabla de exhibición", "question": "¿Está colocada y vigente?", "applies": "ARRANQUE", "status": "no_cumple", "value": 0, "comment": "Reemplazar tabla anterior"},
+    {"id": "q35", "sectionId": "control_food", "sectionTitle": "Control de alimentos", "title": "Parámetros de horneo", "question": "¿Están disponibles y vigentes?", "applies": "ARRANQUE", "status": "cumple", "value": 1, "comment": ""}
+  ]
+}
