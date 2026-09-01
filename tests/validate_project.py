@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image
+from pypdf import PdfReader
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -128,6 +129,8 @@ def main() -> None:
     require("renderJourneyStages" in app_text and "data-edit-question" in app_text, "Falta resumen por Customer Journey o edición de acuerdos.")
     require("openExportConfirmation" in app_text and "renderExportStage" in app_text, "Falta confirmación antes y después de exportar.")
     require("buildPdfFilename" in app_text and "_Fall" in app_text, "Falta nombre dinámico Tienda_Fall.")
+    require("opportunity-followup" in app_text, "Cada oportunidad debe incluir campos pendientes para completar en tienda.")
+    require('break-before: page' in web_text and 'size: letter portrait' in web_text, "La impresión debe separar resumen y oportunidades en dos páginas verticales.")
     require('apple-mobile-web-app-capable' in html_text and 'apple-touch-icon' in html_text, "Falta compatibilidad iOS instalada.")
     dom_block = re.search(r"const ids = \[(.*?)\];", app_text, re.DOTALL)
     require(dom_block is not None, "No se encontró el contrato de elementos DOM.")
@@ -135,7 +138,7 @@ def main() -> None:
     missing_dom = [element_id for element_id in dom_ids if f'id="{element_id}"' not in html_text]
     require(not missing_dom, f"Faltan elementos DOM declarados en app.js: {missing_dom}")
     service_worker = (ROOT / "service-worker.js").read_text(encoding="utf-8")
-    require("validacion-fall26-v6" in service_worker, "La caché offline debe apuntar a la versión 6.")
+    require("validacion-fall26-v7" in service_worker, "La caché offline debe apuntar a la versión 7.")
     for icon in ["apple-touch-icon.png", "icon-192.png", "icon-512.png"]:
         require(icon in service_worker, f"El icono iOS/PWA no está disponible offline: {icon}.")
     for asset in ["data/export_experience.json", "fall26-campaign-reference.webp", "export-working.webp", "export-complete.webp"]:
@@ -153,6 +156,33 @@ def main() -> None:
         subprocess.run([sys.executable, str(ROOT / "scripts/generate_store_report.py"), "--input", str(sample), "--output", str(output)], check=True, cwd=ROOT)
         require(output.read_bytes().startswith(b"%PDF"), "El reporte generado no es un PDF válido.")
         require(output.stat().st_size > 4000, "El reporte PDF parece incompleto.")
+        reader = PdfReader(output)
+        require(len(reader.pages) == 2, "El reporte ejecutivo debe ocupar exactamente dos páginas.")
+        first_page = reader.pages[0].extract_text()
+        second_page = reader.pages[1].extract_text()
+        require("Resumen ejecutivo Fall 26" in first_page and "Categorías evaluadas" in first_page, "La página 1 debe contener el resumen y las categorías.")
+        require("Oportunidades y seguimiento" in second_page and "Completa en tienda" in second_page, "La página 2 debe conservar oportunidades y campos de seguimiento.")
+
+        all_fail = json.loads(sample.read_text(encoding="utf-8"))
+        all_fail["answers"] = [{
+            "id": item["id"],
+            "sectionId": section["id"],
+            "sectionTitle": section["title"],
+            "title": item["title"],
+            "question": item["question"],
+            "applies": item["applies"],
+            "status": "no_cumple",
+            "value": 0,
+            "comment": "Asignar responsable y confirmar la corrección en tienda.",
+        } for section in sections for item in section["items"]]
+        all_fail_input = Path(tmp) / "todos_no_cumple.json"
+        all_fail_output = Path(tmp) / "todos_no_cumple.pdf"
+        all_fail_input.write_text(json.dumps(all_fail, ensure_ascii=False), encoding="utf-8")
+        subprocess.run([
+            sys.executable, str(ROOT / "scripts/generate_store_report.py"),
+            "--input", str(all_fail_input), "--output", str(all_fail_output),
+        ], check=True, cwd=ROOT)
+        require(len(PdfReader(all_fail_output).pages) == 2, "Incluso 36 oportunidades deben conservarse en dos páginas.")
 
     print(f"Proyecto válido: {len(journey_stages)} momentos, {len(sections)} secciones, {len(items)} controles, {len(referenced)} referencias WebP.")
 

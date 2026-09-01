@@ -744,6 +744,10 @@ input {
   color: var(--green);
 }
 
+.opportunity-followup {
+  display: none !important;
+}
+
 .opportunity-edit {
   justify-self: start;
   min-height: 36px;
@@ -831,6 +835,114 @@ input {
 }
 
 @media print {
+  @page { size: letter portrait; margin: 10mm 11mm; }
+
+  html, body { width: auto; min-height: 0; background: #fff !important; }
+  body { color: #2c2430; font-size: 9pt; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .skip-link, .privacy-bar, .app-header, .start-view, .validation-view, .summary-actions,
+  .python-note, .site-footer, .toast, .privacy-dialog, .export-dialog { display: none !important; }
+  .app-main { width: 100%; margin: 0; padding: 0; }
+  .summary-view { display: block !important; width: 100%; max-width: none; margin: 0; }
+
+  .summary-hero {
+    min-height: 42mm;
+    padding: 8mm;
+    border: 1.2pt solid #2c2430;
+    border-radius: 5mm;
+    box-shadow: none;
+  }
+  .summary-hero h2 { margin: 3mm 0 2mm; font-size: 28pt; line-height: .95; }
+  .summary-hero p { font-size: 8.5pt; }
+  .campaign-pill { padding: 1.5mm 3mm; font-size: 6.5pt; }
+  .score-ring { width: 32mm; height: 32mm; flex-basis: 32mm; }
+  .score-ring::before { inset: 3mm; }
+  .score-ring strong { font-size: 18pt; }
+  .score-ring span { font-size: 5.5pt; }
+
+  .summary-kpis { gap: 2.5mm; margin-top: 3mm; }
+  .summary-kpis article { min-height: 16mm; padding: 3mm; border-radius: 3mm; }
+  .kpi-icon { width: 9mm; height: 9mm; border-radius: 2mm; font-size: 12pt; }
+  .summary-kpis strong { font-size: 15pt; }
+  .summary-kpis small { font-size: 5.5pt; }
+
+  .summary-panel { margin-top: 3mm; padding: 4.5mm; border-radius: 4mm; box-shadow: none; break-inside: avoid; }
+  .panel-heading h3 { margin-top: 1mm; font-size: 15pt; }
+  .panel-heading span { font-size: 6pt; }
+  .panel-heading > strong { min-width: 10mm; height: 10mm; border-radius: 2.5mm; font-size: 13pt; }
+  .result-badge { padding: 2mm 3mm; }
+  .result-message { margin-top: 2mm; font-size: 8pt; line-height: 1.35; }
+
+  .section-results { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2mm; margin-top: 3mm; }
+  .section-result {
+    display: flex;
+    min-height: 24mm;
+    padding: 3mm 2.5mm;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1mm;
+    border: .6pt solid #bdd7cb;
+    border-top: 2pt solid #006241;
+    border-radius: 2.5mm;
+    background: #fffdf8;
+  }
+  .section-result header { display: block; margin: 0; font-size: 7pt; line-height: 1.25; }
+  .section-result header span, .section-result header small { display: block; }
+  .section-result header em { display: none; }
+  .section-result header small { margin-top: 1mm; color: #5f6f69; font-size: 5.5pt; }
+  .section-result .mini-track { display: none; }
+  .section-result > strong { font-size: 13pt; text-align: left; }
+
+  .strengths-panel { padding: 3.5mm 4.5mm; background: #eef8f3; }
+  .strengths-panel .panel-heading { align-items: center; }
+  .strengths-panel .panel-heading h3 { font-size: 13pt; }
+  .strengths-list { display: none !important; }
+
+  .summary-panel[aria-labelledby="opportunitiesTitle"] {
+    min-height: 245mm;
+    margin-top: 0;
+    padding: 7mm;
+    border: 0;
+    border-radius: 0;
+    break-before: page;
+    page-break-before: always;
+  }
+  .summary-panel[aria-labelledby="opportunitiesTitle"] .panel-heading {
+    padding-bottom: 4mm;
+    border-bottom: 1pt solid #d8cbb8;
+  }
+  .summary-panel[aria-labelledby="opportunitiesTitle"] .panel-heading h3 { font-size: 22pt; }
+  .summary-panel[aria-labelledby="opportunitiesTitle"] .panel-heading p { font-size: 8pt; }
+  .opportunities-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3mm; margin-top: 4mm; }
+  .opportunity {
+    grid-template-columns: 7mm minmax(0, 1fr) auto;
+    gap: 2.5mm;
+    padding: 3.5mm;
+    border-left-width: 2pt;
+    border-radius: 3mm;
+    break-inside: avoid;
+  }
+  .opportunity > b { width: 7mm; height: 7mm; border-radius: 2mm; }
+  .opportunity strong { padding-right: 11mm; font-size: 8pt; }
+  .opportunity p { font-size: 6.7pt; line-height: 1.35; }
+  .opportunity small { font-size: 6.5pt; }
+  .opportunity > span { font-size: 6pt; }
   .opportunity-edit { display: none !important; }
-  .section-result header em { color: #555 !important; }
+  .opportunity-followup {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 2mm 3mm;
+    margin-top: 2mm;
+    padding-top: 2mm;
+    border-top: .6pt solid #bdd7cb;
+    color: #4c5b55;
+    font-size: 6pt;
+  }
+  .summary-privacy-note {
+    display: flex !important;
+    margin-top: 4mm;
+    padding: 3mm 4mm;
+    border-radius: 2.5mm;
+    break-inside: avoid;
+    font-size: 6.5pt;
+  }
 }
