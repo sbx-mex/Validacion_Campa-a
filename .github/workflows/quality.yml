@@ -40,6 +40,7 @@ jobs:
         run: |
           node --check app.js
           node --check service-worker.js
+          node tests/test_app_logic.js
 
       - name: Construir y verificar paquete
         run: |
