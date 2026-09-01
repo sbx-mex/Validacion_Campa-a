@@ -24,6 +24,8 @@ from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
     Image as ReportImage,
+    KeepInFrame,
+    PageBreak,
     PageTemplate,
     Paragraph,
     Spacer,
@@ -170,6 +172,7 @@ def build_styles() -> dict[str, ParagraphStyle]:
         "section": ParagraphStyle("Section", parent=base["Heading2"], fontName=BOLD, fontSize=12, leading=15, textColor=GREEN, spaceBefore=5, spaceAfter=4),
         "body": ParagraphStyle("Body", parent=base["BodyText"], fontName=REGULAR, fontSize=8.4, leading=11, textColor=INK),
         "small": ParagraphStyle("Small", parent=base["BodyText"], fontName=REGULAR, fontSize=7.2, leading=9.2, textColor=MUTED),
+        "micro": ParagraphStyle("Micro", parent=base["BodyText"], fontName=REGULAR, fontSize=6.3, leading=7.8, textColor=MUTED),
         "privacy": ParagraphStyle("Privacy", parent=base["BodyText"], fontName=REGULAR, fontSize=7.1, leading=9, textColor=colors.white),
         "kpi": ParagraphStyle("Kpi", parent=base["Normal"], fontName=BOLD, fontSize=20, leading=22, textColor=DARK, alignment=TA_CENTER),
         "kpi_label": ParagraphStyle("KpiLabel", parent=base["Normal"], fontName=BOLD, fontSize=7, leading=8, textColor=MUTED, alignment=TA_CENTER),
@@ -223,6 +226,91 @@ def compact_report_image(path: Path, width: float, height: float) -> ReportImage
     return ReportImage(buffer, width=width, height=height)
 
 
+def opportunity_card(
+    answer: dict[str, Any],
+    number: int,
+    styles: dict[str, ParagraphStyle],
+    width: float,
+    *,
+    compact: bool = False,
+) -> Table:
+    """Construye una oportunidad accionable con campos para el cierre en tienda."""
+    body_style = styles["micro"] if compact else styles["small"]
+    title_limit = 50 if compact else 70
+    action_limit = 115 if compact else 175
+    agreement_limit = 70 if compact else 110
+    stage_label = safe_text(answer.get("journeyStageTitle") or answer.get("sectionTitle"), 28)
+    agreement = safe_text(answer.get("comment"), agreement_limit) or "Pendiente de definir en tienda."
+    applies = safe_text(answer.get("applies"), 24)
+    rows = [
+        [Paragraph(
+            f"<font color='#D94F1D'><b>{number:02d}</b></font>  "
+            f"<font color='#006241'><b>{stage_label}</b></font>  "
+            f"<font color='#D94F1D'>{applies}</font><br/>"
+            f"<b>{safe_text(answer.get('title'), title_limit)}</b>",
+            body_style,
+        )],
+        [Paragraph(
+            f"<b>Corrección inmediata:</b> {safe_text(answer.get('suggestedAction'), action_limit)}",
+            body_style,
+        )],
+        [Paragraph(f"<b>Acuerdo registrado:</b> {agreement}", body_style)],
+        [Paragraph(
+            "<font color='#5F6F69'><b>Completa en tienda:</b> "
+            "Responsable: __________  Fecha: ____ / ____  "
+            "[ ] Corregido  [ ] Pendiente  Revalidó: __________</font>",
+            body_style,
+        )],
+    ]
+    card = Table(rows, colWidths=[width])
+    card.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FFFDF8")),
+        ("BACKGROUND", (0, 3), (-1, 3), colors.HexColor("#EEF8F3")),
+        ("BOX", (0, 0), (-1, -1), .7, colors.HexColor("#D8CBB8")),
+        ("LINEBEFORE", (0, 0), (0, -1), 2.4, ORANGE),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 3 if compact else 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3 if compact else 4),
+    ]))
+    return card
+
+
+def opportunity_grid(
+    opportunities: list[dict[str, Any]],
+    styles: dict[str, ParagraphStyle],
+    width: float,
+) -> Table:
+    """Distribuye las oportunidades en una o dos columnas para conservar dos páginas."""
+    gap = 4 * mm
+    columns = 1 if len(opportunities) <= 4 else 2
+    card_width = width if columns == 1 else (width - gap) / 2
+    compact = len(opportunities) > 8
+    cards = [
+        opportunity_card(answer, number, styles, card_width, compact=compact)
+        for number, answer in enumerate(opportunities, start=1)
+    ]
+    rows = []
+    for index in range(0, len(cards), columns):
+        rows.append(cards[index:index + columns] + [""] * (columns - len(cards[index:index + columns])))
+    grid = Table(rows, colWidths=[card_width] * columns, hAlign="LEFT")
+    grid_style = [
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3 if compact else 5),
+    ]
+    if columns == 2:
+        grid_style += [
+            ("RIGHTPADDING", (0, 0), (0, -1), gap / 2),
+            ("LEFTPADDING", (1, 0), (1, -1), gap / 2),
+            ("RIGHTPADDING", (1, 0), (1, -1), 0),
+        ]
+    grid.setStyle(TableStyle(grid_style))
+    return grid
+
+
 def build_report(payload: dict[str, Any], output_path: Path) -> None:
     corrective_actions, catalog, stage_definitions = load_catalog()
     answers = enrich_answers(payload["answers"], catalog)
@@ -249,10 +337,11 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="main")
     doc.addPageTemplates([PageTemplate(id="report", frames=[frame], onPage=header_footer)])
 
+    # Página 1: lectura ejecutiva, categorías evaluadas y reconocimiento.
     story = [
         Paragraph("RECORRIDO COMPLETADO", styles["eyebrow"]),
-        Paragraph("Resultado Fall 26", styles["title"]),
-        Paragraph("Gracias por validar. Celebremos lo que está listo y resolvamos juntos cada oportunidad.", styles["subtitle"]),
+        Paragraph("Resumen ejecutivo Fall 26", styles["title"]),
+        Paragraph("Una lectura breve del recorrido: qué está sólido y dónde enfocar la corrección.", styles["subtitle"]),
     ]
     responsibility = payload.get("responsibility") or {}
     acceptance = "Aceptación registrada" if responsibility.get("accepted") else "Aceptación no incluida en el archivo"
@@ -296,34 +385,23 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
         ("TOPPADDING", (0, 0), (-1, -1), 8), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
     ]))
-    strength_names = " · ".join(safe_text(answer.get("title"), 45) for answer in strengths[:6])
-    if len(strengths) > 6:
-        strength_names += f" · y {len(strengths) - 6} más"
-    if not strength_names:
-        strength_names = "Los puntos corregidos aparecerán aquí en la siguiente validación."
-    recognition_image = ROOT / "assets" / "ui" / "export-complete.webp"
-    recognition_cells = [
+    recognition = Table([[
         Paragraph(f"{len(strengths)}<br/><font size='7'>PUNTOS A FAVOR</font>", styles["white"]),
         Paragraph(
-            f"<b>Reconozcamos al equipo</b><br/>{strength_names}<br/>"
-            "<font color='#006241'>Atiende las oportunidades lo antes posible y comparte los acuerdos con tu DM.</font>",
+            "<b>Reconozcamos lo logrado.</b> Mantén estos estándares y concentra el siguiente recorrido "
+            "en las oportunidades enlistadas en la página 2.",
             styles["warm"],
         ),
-    ]
-    recognition_widths = [34 * mm, doc.width - 34 * mm]
-    if recognition_image.is_file():
-        recognition_cells.append(compact_report_image(recognition_image, width=40 * mm, height=22.5 * mm))
-        recognition_widths = [31 * mm, doc.width - 74 * mm, 43 * mm]
-    recognition = Table([recognition_cells], colWidths=recognition_widths)
+    ]], colWidths=[34 * mm, doc.width - 34 * mm])
     recognition.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (0, 0), GREEN),
-        ("BACKGROUND", (1, 0), (-1, 0), colors.HexColor("#EEF8F3")),
+        ("BACKGROUND", (1, 0), (1, 0), colors.HexColor("#EEF8F3")),
         ("BOX", (0, 0), (-1, -1), .7, colors.HexColor("#8DB9A6")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
         ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
     ]))
-    story += [result, Spacer(1, 3 * mm), recognition, Spacer(1, 5 * mm), Paragraph("Customer Journey", styles["section"])]
+    story += [result, Spacer(1, 3 * mm), Paragraph("Categorías evaluadas", styles["section"])]
 
     journey = Table(
         [[journey_card(stage, styles) for stage in stages]],
@@ -333,34 +411,43 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 2), ("RIGHTPADDING", (0, 0), (-1, -1), 2),
     ]))
-    story += [journey, Spacer(1, 5 * mm), Paragraph(f"Ruta de mejora ({len(opportunities)})", styles["section"])]
-    story.append(Paragraph("Cada oportunidad conserva el acuerdo registrado para corregir, asignar y volver a validar.", styles["warm"]))
-    story.append(Spacer(1, 2 * mm))
+    story += [journey, Spacer(1, 5 * mm), recognition, PageBreak()]
+
+    # Página 2: oportunidades y seguimiento pendiente para completar en tienda.
+    story += [
+        Paragraph("MEJORA CONTINUA", styles["eyebrow"]),
+        Paragraph(f"Oportunidades y seguimiento ({len(opportunities)})", styles["title"]),
+        Paragraph(
+            "Corrige, asigna responsable y vuelve a validar. Cada tarjeta conserva la acción recomendada y deja el cierre pendiente para la tienda.",
+            styles["subtitle"],
+        ),
+    ]
 
     if not opportunities:
-        story.append(Paragraph("No se registraron puntos NO CUMPLE. Celebra el resultado, mantén el estándar y reconoce al equipo.", styles["body"]))
+        story.append(Paragraph(
+            "No se registraron puntos NO CUMPLE. Reconoce al equipo, mantén el estándar y vuelve a validar en el siguiente recorrido.",
+            styles["body"],
+        ))
     else:
-        opportunity_rows = [["#", "Momento y punto", "Corrige ahora", "Acuerdo y cierre"]]
-        for number, answer in enumerate(opportunities, start=1):
-            stage_label = safe_text(answer.get("journeyStageTitle") or answer.get("sectionTitle"), 30)
-            agreement = safe_text(answer.get("comment"), 120)
-            opportunity_rows.append([
-                str(number),
-                Paragraph(f"<font color='#006241'><b>{stage_label}</b></font><br/><b>{safe_text(answer.get('title'), 70)}</b><br/><font color='#D94F1D'>{safe_text(answer.get('applies'), 25)}</font>", styles["small"]),
-                Paragraph(safe_text(answer.get("suggestedAction"), 190), styles["small"]),
-                Paragraph(f"<b>Acuerdo:</b> {agreement}<br/><br/><font color='#5F6F69'>Responsable: __________<br/>Fecha: ____ / ____</font>", styles["small"]),
-            ])
-        opportunities_table = Table(opportunity_rows, colWidths=[9 * mm, 43 * mm, 70 * mm, 55 * mm], repeatRows=1)
-        opportunities_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), ORANGE), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), BOLD), ("FONTSIZE", (0, 0), (-1, -1), 7.3),
-            ("ALIGN", (0, 0), (0, -1), "CENTER"), ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FFF8F1")]),
-            ("GRID", (0, 0), (-1, -1), .35, colors.HexColor("#D8CBB8")),
-            ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-            ("TOPPADDING", (0, 0), (-1, -1), 3.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
-        ]))
-        story.append(opportunities_table)
+        grid = opportunity_grid(opportunities, styles, doc.width)
+        # Reserva espacio estable para el encabezado y el cierre, aun con 36 oportunidades.
+        story.append(KeepInFrame(doc.width, doc.height - 76 * mm, [grid], mode="shrink"))
+
+    story += [Spacer(1, 4 * mm)]
+    closing = Table([[
+        Paragraph("<b>Cierre de tienda</b><br/>Responsable de revalidación: ____________________", styles["small"]),
+        Paragraph("<b>Fecha</b><br/>____ / ____ / ______", styles["small"]),
+        Paragraph("<b>Resultado</b><br/>[ ] Corregido  [ ] Pendiente", styles["small"]),
+    ]], colWidths=[doc.width * .46, doc.width * .22, doc.width * .32])
+    closing.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), LIGHT),
+        ("BOX", (0, 0), (-1, -1), .7, colors.HexColor("#8DB9A6")),
+        ("INNERGRID", (0, 0), (-1, -1), .5, colors.HexColor("#BCD2C8")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 7), ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+        ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+    story.append(closing)
 
     doc.build(story)
 

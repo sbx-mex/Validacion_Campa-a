@@ -49,3 +49,12 @@
 38. Tres recursos WebP creados con Python desde la referencia oficial de campaña.
 39. Cierre cálido en el PDF con acciones recomendadas y seguimiento con el DM.
 40. Caché PWA v6 para conservar la nueva experiencia completa sin conexión.
+
+## Reporte ejecutivo en dos páginas
+
+41. Página 1 compacta con identidad, tasa de éxito, lectura objetiva, categorías evaluadas y reconocimiento.
+42. Página 2 dedicada a oportunidades y seguimiento, sin separar la información accionable.
+43. Campos pendientes por oportunidad para responsable, fecha, corrección y revalidación en tienda.
+44. Diseño de impresión vertical que elimina páginas vacías y el enlace de accesibilidad impreso.
+45. Motor Python con distribución adaptable y validación automática de exactamente dos páginas, incluso con 36 oportunidades.
+46. Caché PWA v7 para publicar de inmediato el nuevo diseño de impresión y seguimiento.

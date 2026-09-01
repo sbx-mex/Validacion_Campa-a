@@ -56,7 +56,7 @@ python scripts/generate_store_report.py \
   --input sample/ejemplo_resultado.json
 ```
 
-El reporte reconoce los puntos **Cumple**, muestra la tasa de éxito por momento del Customer Journey y conserva una ruta de mejora con acción, acuerdo, responsable y fecha.
+El reporte se entrega en **dos páginas**: la primera resume la tasa de éxito, las categorías evaluadas y los puntos a favor; la segunda concentra todas las oportunidades y deja campos para responsable, fecha, corrección y revalidación en tienda.
 
 La portada y los dos momentos de exportación se construyen desde la referencia oficial proporcionada:
 

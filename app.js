@@ -517,6 +517,7 @@ function renderJourneyStages() {
 function renderOpportunities() {
   const opportunities = questions.filter((item) => state.answers[item.id]?.status === STATUS.FAIL);
   dom.opportunityCount.textContent = opportunities.length;
+  dom.summaryView.dataset.opportunityCount = String(opportunities.length);
   dom.opportunitiesList.replaceChildren();
   if (!opportunities.length) {
     const empty = document.createElement("div");
@@ -536,6 +537,12 @@ function renderOpportunities() {
         <strong>${escapeHtml(stage?.title || item.sectionTitle)} · ${escapeHtml(item.title)}</strong>
         <p><span>Corrige ahora:</span> ${escapeHtml(correctionActionFor(item))}</p>
         <small><b>Acuerdo:</b> ${escapeHtml(answer.comment)}</small>
+        <div class="opportunity-followup" aria-label="Seguimiento pendiente para completar en tienda">
+          <span><b>Responsable:</b> ____________________</span>
+          <span><b>Fecha:</b> ____ / ____ / ______</span>
+          <span><b>Estado:</b> □ Corregido &nbsp; □ Pendiente</span>
+          <span><b>Revalidó:</b> ____________________</span>
+        </div>
         <button class="opportunity-edit" type="button" data-edit-question="${escapeHtml(item.id)}">Ajustar acuerdo</button>
       </div>
       <span>${escapeHtml(item.applies)}</span>`;
