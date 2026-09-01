@@ -18,15 +18,18 @@
   <a class="skip-link" href="#mainContent">Saltar al contenido</a>
 
   <div class="privacy-bar" role="note">
-    <span aria-hidden="true">●</span>
-    <strong>USO INTERNO</strong>
-    <span>Información privada de la compañía · Prohibida su divulgación</span>
+    <div>
+      <span aria-hidden="true">●</span>
+      <strong id="privacyClassification">USO INTERNO</strong>
+      <span id="privacyNotice">Información privada de la compañía · Prohibida su divulgación</span>
+    </div>
+    <button id="openPrivacy" type="button">Responsabilidad de uso</button>
   </div>
 
   <header class="app-header">
     <div class="brand-mark" aria-hidden="true"><i></i><i></i><b></b></div>
     <div class="brand-copy">
-      <span class="eyebrow">JUNTÉMONOS MÁS</span>
+      <span id="headerEyebrow" class="eyebrow">JUNTÉMONOS MÁS</span>
       <h1>Validación Campaña</h1>
       <p>Fall 26</p>
     </div>
@@ -41,13 +44,15 @@
     <section id="startView" class="view start-view" aria-labelledby="startTitle">
       <div class="hero-card">
         <div class="hero-art" aria-hidden="true">
-          <img src="assets/reference/q05.webp" alt="">
-          <span>Referencia oficial · Aboards Fall</span>
+          <img id="heroImage" src="assets/reference/q07.webp" alt="">
+          <span>Referencia oficial de campaña</span>
         </div>
         <div class="hero-copy">
           <span class="campaign-pill">ARRANQUE FALL 26</span>
-          <h2 id="startTitle">Un recorrido.<br>Decisiones claras.</h2>
-          <p>Valida los puntos controlables de la campaña y termina con una lectura ejecutiva de oportunidades.</p>
+          <h2 id="startTitle">Fall ya está aquí.</h2>
+          <p id="heroIntro" class="hero-intro">Hagamos que esta temporada se viva en cada tienda.</p>
+          <p id="heroPromise" class="hero-promise">Un recorrido cálido, rápido y objetivo para reconocer lo que funciona y corregir lo necesario.</p>
+          <div class="together-note"><span aria-hidden="true">♡</span><strong>JUNTÉMONOS</strong><em>más</em></div>
           <div class="hero-metrics" aria-label="Alcance del recorrido">
             <div><strong>36</strong><span>controles</span></div>
             <div><strong>9</strong><span>secciones</span></div>
@@ -59,7 +64,7 @@
       <form id="startForm" class="start-form" novalidate>
         <div class="form-heading">
           <span class="step-dot">1</span>
-          <div><h3>Antes de comenzar</h3><p>Completa únicamente estos dos datos.</p></div>
+          <div><h3>Identifica el recorrido</h3><p>Completa únicamente estos dos datos.</p></div>
         </div>
         <div class="identity-grid">
           <label>
@@ -71,13 +76,30 @@
             <input id="validatorInput" name="validator" maxlength="80" autocomplete="name" placeholder="Nombre del responsable" required>
           </label>
         </div>
-        <label class="privacy-confirm">
+        <section class="responsibility-card" aria-labelledby="responsibilityTitle">
+          <div class="responsibility-icon" aria-hidden="true">✓</div>
+          <div>
+            <span>ANTES DE CONTINUAR</span>
+            <h4 id="responsibilityTitle">Responsabilidad de uso</h4>
+            <p>La validación se guarda sólo en este dispositivo y se elimina automáticamente después de <strong id="retentionHours">24 horas</strong>.</p>
+            <details>
+              <summary>Qué información no debes registrar</summary>
+              <ul id="prohibitedDataList">
+                <li>Datos personales de clientes o partners</li>
+                <li>Contraseñas, accesos o información financiera</li>
+                <li>Capturas o resultados en canales no autorizados</li>
+              </ul>
+            </details>
+          </div>
+        </section>
+        <label class="privacy-confirm responsibility-confirm">
           <input id="privacyConfirm" type="checkbox" required>
-          <span>Usaré esta información únicamente para la validación interna de la tienda.</span>
+          <span id="responsibilityText">Confirmo que utilizaré esta herramienta únicamente para la operación autorizada, protegeré el material y resguardaré los resultados.</span>
         </label>
         <div class="start-actions">
           <button class="primary-button" type="submit">Iniciar recorrido <span aria-hidden="true">→</span></button>
           <button id="resumeButton" class="secondary-button" type="button" hidden>Continuar recorrido guardado</button>
+          <button id="clearLocalData" class="text-button danger-text" type="button">Borrar datos locales</button>
         </div>
         <p id="startError" class="form-error" role="alert" aria-live="polite"></p>
       </form>
@@ -105,6 +127,8 @@
         </div>
       </div>
       <div class="progress-track" aria-hidden="true"><i id="progressBar"></i></div>
+      <nav id="sectionRail" class="section-rail" aria-label="Secciones del recorrido"></nav>
+      <div class="save-status" role="status"><i aria-hidden="true"></i><span id="saveStatus">Avance guardado en este dispositivo</span></div>
 
       <article id="questionCard" class="question-card">
         <div class="question-topline">
@@ -137,6 +161,7 @@
           <button class="choice choice-fail" type="button" data-status="no_cumple"><b>×</b><span>No cumple<small>0 puntos</small></span></button>
           <button class="choice choice-na" type="button" data-status="na"><b>•</b><span>No aplica<small>No pondera</small></span></button>
         </fieldset>
+        <p id="keyboardHint" class="keyboard-hint">Atajos: <kbd>1</kbd> Cumple · <kbd>0</kbd> No cumple · <kbd>N</kbd> No aplica</p>
 
         <label id="commentWrap" class="comment-wrap">
           <span>Comentario breve <small id="commentHint">opcional</small></span>
@@ -190,6 +215,7 @@
         <button id="printReport" class="secondary-button" type="button">Guardar resumen PDF</button>
         <button id="restartButton" class="text-button" type="button">Nueva validación</button>
       </div>
+      <aside class="summary-privacy-note"><b>Uso responsable</b><span id="summaryPrivacyWarning">El JSON y el PDF deben permanecer únicamente en canales internos autorizados.</span></aside>
       <p class="python-note">El JSON descargado puede convertirse en PDF ejecutivo con <code>python scripts/generate_store_report.py</code>.</p>
     </section>
   </main>
@@ -197,8 +223,25 @@
   <footer class="site-footer">
     <div><strong>JUNTÉMONOS</strong><em>más</em></div>
     <p>Validación Campaña · Fall 26</p>
-    <small>Información privada de la compañía. Uso exclusivo para operación.</small>
+    <small>Información privada de la compañía. Uso exclusivo para operación autorizada.</small>
+    <button id="openPrivacyFooter" type="button">Consultar responsabilidad de uso</button>
   </footer>
+
+  <dialog id="privacyDialog" class="privacy-dialog">
+    <button id="closePrivacyDialog" class="dialog-close" type="button" aria-label="Cerrar aviso">×</button>
+    <div class="privacy-dialog-icon" aria-hidden="true">✓</div>
+    <span class="campaign-pill">INFORMACIÓN PRIVADA</span>
+    <h2>Protege el material y el resultado</h2>
+    <p>Esta herramienta es exclusiva para la validación operativa autorizada de Fall 26.</p>
+    <ol>
+      <li><b>Registra sólo lo necesario:</b> tienda, responsable y observaciones operativas.</li>
+      <li><b>No captures datos personales:</b> evita nombres de clientes, teléfonos, correos o fotografías de personas.</li>
+      <li><b>Resguarda las descargas:</b> comparte JSON y PDF únicamente por canales internos autorizados.</li>
+      <li><b>Evita exposición pública:</b> no publiques materiales ni resultados en repositorios o sitios abiertos.</li>
+    </ol>
+    <div class="privacy-storage"><span aria-hidden="true">◎</span><div><b>Guardado local</b><small>La aplicación no envía datos a servicios externos.</small></div></div>
+    <button id="acknowledgePrivacy" class="primary-button" type="button">Entendido</button>
+  </dialog>
 
   <dialog id="imageDialog" class="image-dialog">
     <button id="closeImageDialog" class="dialog-close" type="button" aria-label="Cerrar imagen">×</button>

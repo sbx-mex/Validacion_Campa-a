@@ -3,6 +3,13 @@
   "project": "Validación Campaña",
   "campaign": "Fall 26",
   "privateNotice": "Información privada de la compañía. Uso exclusivo para validación operativa. Prohibida su divulgación.",
+  "responsibility": {
+    "accepted": true,
+    "acceptedAt": "2026-09-01T09:00:00-06:00",
+    "storageMode": "local_only",
+    "retentionHours": 24,
+    "exportWarning": "El JSON y el PDF deben permanecer únicamente en canales internos autorizados."
+  },
   "store": "Tienda Ejemplo 001",
   "validator": "Responsable de ejemplo",
   "startedAt": "2026-09-01T09:00:00-06:00",

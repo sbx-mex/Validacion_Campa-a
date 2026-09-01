@@ -19,6 +19,11 @@ FORBIDDEN_SUFFIXES = {".zip", ".jpg", ".jpeg"}
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--root-name",
+        default="Validacion_Campana",
+        help="Nombre de la carpeta raíz dentro del ZIP.",
+    )
     return parser.parse_args()
 
 
@@ -52,19 +57,26 @@ def write_manifest(files: list[Path]) -> None:
     MANIFEST.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_zip(files: list[Path], output: Path) -> None:
+def validate_root_name(root_name: str) -> str:
+    candidate = Path(root_name)
+    if not root_name.strip() or candidate.name != root_name or root_name in {".", ".."}:
+        raise ValueError("--root-name debe ser un nombre de carpeta simple y seguro")
+    return root_name
+
+
+def write_zip(files: list[Path], output: Path, root_name: str) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for path in [*files, MANIFEST]:
             relative = path.relative_to(ROOT)
-            archive.write(path, Path(ROOT.name) / relative)
+            archive.write(path, Path(root_name) / relative)
 
 
 def main() -> None:
     args = parse_args()
     files = project_files(args.output)
     write_manifest(files)
-    write_zip(files, args.output)
+    write_zip(files, args.output, validate_root_name(args.root_name))
     print(f"Release listo: {args.output} ({len(files) + 1} archivos)")
 
 

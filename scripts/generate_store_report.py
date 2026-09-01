@@ -34,12 +34,13 @@ from scoring import build_section_summary, calculate_counts, calculate_score, cl
 
 GREEN = colors.HexColor("#006241")
 DARK = colors.HexColor("#003B2D")
-ORANGE = colors.HexColor("#D96F1D")
-CREAM = colors.HexColor("#F7F1E7")
-INK = colors.HexColor("#172B25")
+ORANGE = colors.HexColor("#D94F1D")
+CREAM = colors.HexColor("#FFF8ED")
+INK = colors.HexColor("#2C2430")
 MUTED = colors.HexColor("#5F6F69")
 RED = colors.HexColor("#B42318")
 LIGHT = colors.HexColor("#E9F2EE")
+PLUM = colors.HexColor("#2C2430")
 REGULAR = "DejaVu"
 BOLD = "DejaVu-Bold"
 FONT_DIR = Path(__file__).resolve().parents[1] / "assets" / "fonts"
@@ -84,6 +85,8 @@ def header_footer(canvas, doc) -> None:
     width, height = letter
     canvas.setFillColor(DARK)
     canvas.rect(0, height - 17 * mm, width, 17 * mm, fill=1, stroke=0)
+    canvas.setFillColor(ORANGE)
+    canvas.rect(0, height - 18.2 * mm, width, 1.2 * mm, fill=1, stroke=0)
     canvas.setFillColor(colors.white)
     canvas.setFont(BOLD, 8)
     canvas.drawString(18 * mm, height - 10.7 * mm, "VALIDACIÓN CAMPAÑA · FALL 26")
@@ -106,6 +109,7 @@ def build_styles() -> dict[str, ParagraphStyle]:
         "section": ParagraphStyle("Section", parent=base["Heading2"], fontName=BOLD, fontSize=12, leading=15, textColor=GREEN, spaceBefore=5, spaceAfter=4),
         "body": ParagraphStyle("Body", parent=base["BodyText"], fontName=REGULAR, fontSize=8.4, leading=11, textColor=INK),
         "small": ParagraphStyle("Small", parent=base["BodyText"], fontName=REGULAR, fontSize=7.2, leading=9.2, textColor=MUTED),
+        "privacy": ParagraphStyle("Privacy", parent=base["BodyText"], fontName=REGULAR, fontSize=7.1, leading=9, textColor=colors.white),
         "kpi": ParagraphStyle("Kpi", parent=base["Normal"], fontName=BOLD, fontSize=20, leading=22, textColor=DARK, alignment=TA_CENTER),
         "kpi_label": ParagraphStyle("KpiLabel", parent=base["Normal"], fontName=BOLD, fontSize=7, leading=8, textColor=MUTED, alignment=TA_CENTER),
         "white": ParagraphStyle("White", parent=base["Normal"], fontName=BOLD, fontSize=10, leading=12, textColor=colors.white, alignment=TA_CENTER),
@@ -146,18 +150,30 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         Paragraph("Resultado de tienda", styles["title"]),
         Paragraph("Resumen ejecutivo del recorrido operativo Fall 26.", styles["subtitle"]),
     ]
+    responsibility = payload.get("responsibility") or {}
+    acceptance = "Aceptación registrada" if responsibility.get("accepted") else "Aceptación no incluida en el archivo"
+    accepted_at = parse_date(responsibility.get("acceptedAt")) if responsibility.get("acceptedAt") else "Sin fecha"
+    retention = safe_text(responsibility.get("retentionHours") or 24, 4)
+    privacy_line = (
+        f"<b>RESPONSABILIDAD DE USO</b> · {acceptance}: {accepted_at} · "
+        f"Guardado local hasta {retention} horas · Resguarda JSON y PDF sólo en canales internos autorizados."
+    )
     identity = Table([
         [Paragraph("<b>Tienda</b><br/>" + safe_text(payload.get("store"), 80), styles["body"]),
          Paragraph("<b>Quién validó</b><br/>" + safe_text(payload.get("validator"), 80), styles["body"]),
          Paragraph("<b>Cierre</b><br/>" + parse_date(payload.get("completedAt")), styles["body"])],
+        [Paragraph(privacy_line, styles["privacy"]), "", ""],
     ], colWidths=[doc.width * .36, doc.width * .36, doc.width * .28])
     identity.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), LIGHT), ("BOX", (0, 0), (-1, -1), .6, colors.HexColor("#BCD2C8")),
         ("INNERGRID", (0, 0), (-1, -1), .4, colors.HexColor("#BCD2C8")), ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 7), ("RIGHTPADDING", (0, 0), (-1, -1), 7),
         ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ("SPAN", (0, 1), (-1, 1)), ("BACKGROUND", (0, 1), (-1, 1), PLUM),
+        ("LEFTPADDING", (0, 1), (-1, 1), 8), ("RIGHTPADDING", (0, 1), (-1, 1), 8),
+        ("TOPPADDING", (0, 1), (-1, 1), 6), ("BOTTOMPADDING", (0, 1), (-1, 1), 6),
     ]))
-    story += [identity, Spacer(1, 7 * mm)]
+    story += [identity, Spacer(1, 4 * mm)]
 
     score_text = "-" if score is None else f"{score:.1f}%"
     cards = Table([[

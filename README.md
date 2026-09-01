@@ -6,10 +6,19 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 
 > **Información privada de la compañía.** No publiques este repositorio ni habilites un sitio público sin autorización corporativa. Consulta [PRIVACIDAD.md](PRIVACIDAD.md).
 
+## Experiencia Fall 26
+
+- Estética cálida Starbucks + Peanuts basada en la referencia oficial ya incluida en el proyecto.
+- Portada, mensajes y paleta controlados desde `config/settings.json`.
+- Navegación por nueve bloques, avance local y atajos `1`, `0` y `N`.
+- Aviso de responsabilidad obligatorio al iniciar o reanudar.
+- Retención local máxima de 24 horas y botón para borrar el recorrido del dispositivo.
+- Cero servicios externos: la aplicación no transmite los datos capturados.
+
 ## Cómo funciona
 
 1. Captura únicamente **Tienda** y **Quién valida**.
-2. Responde los 36 controles en orden:
+2. Responde los 36 controles; puedes cambiar de bloque desde el navegador superior:
    - **Cumple = 1**
    - **No cumple = 0** y requiere una acción breve.
    - **No aplica** queda fuera del cálculo.
@@ -66,6 +75,7 @@ python tests/validate_project.py
 python -m unittest tests/test_scoring.py
 node --check app.js
 node --check service-worker.js
+node tests/test_app_logic.js
 ```
 
 El workflow de GitHub ejecuta esas revisiones en cada `push` y `pull_request`. No existe despliegue automático: es una protección deliberada porque el contenido es privado.

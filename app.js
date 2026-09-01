@@ -28,10 +28,13 @@ async function init() {
       fetchJson(PATHS.checklist),
     ]);
     questions = flattenChecklist(checklist);
+    applyExperienceSettings();
     validateContent();
     state = createEmptyState();
     bindEvents();
+    renderSectionRail();
     prepareResume();
+    maybeShowPrivacyDialog();
     registerServiceWorker();
   } catch (error) {
     console.error(error);
@@ -51,6 +54,10 @@ function bindDom() {
     "summaryScore", "passCount", "failCount", "naCount", "answeredCount", "resultBadge", "resultMessage",
     "sectionResults", "opportunityCount", "opportunitiesList", "downloadJson", "printReport", "restartButton",
     "imageDialog", "closeImageDialog", "dialogImage", "dialogTitle", "dialogDate", "toast",
+    "privacyClassification", "privacyNotice", "headerEyebrow", "startTitle", "heroImage", "heroIntro", "heroPromise",
+    "retentionHours", "prohibitedDataList", "responsibilityTitle", "responsibilityText", "clearLocalData", "sectionRail",
+    "saveStatus", "keyboardHint", "summaryPrivacyWarning", "openPrivacy", "openPrivacyFooter",
+    "privacyDialog", "closePrivacyDialog", "acknowledgePrivacy",
   ];
   ids.forEach((id) => { dom[id] = document.getElementById(id); });
 }
@@ -70,7 +77,7 @@ function flattenChecklist(data) {
 }
 
 function validateContent() {
-  if (!settings?.storageKey || !Array.isArray(checklist?.sections)) throw new Error("Configuración incompleta.");
+  if (!settings?.storageKey || !settings?.privacy?.responsibilityText || !Array.isArray(checklist?.sections)) throw new Error("Configuración incompleta.");
   if (questions.length !== 36) throw new Error(`Se esperaban 36 controles y se encontraron ${questions.length}.`);
   const ids = new Set(questions.map((item) => item.id));
   if (ids.size !== questions.length) throw new Error("Existen controles duplicados.");
@@ -89,6 +96,7 @@ function createEmptyState() {
     startedAt: null,
     completedAt: null,
     currentIndex: 0,
+    privacyAcceptedAt: null,
     answers: {},
   };
 }
@@ -109,6 +117,15 @@ function bindEvents() {
   dom.downloadJson.addEventListener("click", downloadResultJson);
   dom.printReport.addEventListener("click", () => window.print());
   dom.restartButton.addEventListener("click", restartValidation);
+  dom.clearLocalData.addEventListener("click", clearSavedValidation);
+  dom.sectionRail.addEventListener("click", handleSectionJump);
+  dom.openPrivacy.addEventListener("click", openPrivacyDialog);
+  dom.openPrivacyFooter.addEventListener("click", openPrivacyDialog);
+  dom.closePrivacyDialog.addEventListener("click", closePrivacyDialog);
+  dom.acknowledgePrivacy.addEventListener("click", closePrivacyDialog);
+  dom.privacyDialog.addEventListener("click", (event) => {
+    if (event.target === dom.privacyDialog) closePrivacyDialog();
+  });
   document.addEventListener("keydown", handleKeyboard);
 }
 
@@ -136,6 +153,7 @@ function startValidation(event) {
   state.store = store;
   state.validator = validator;
   state.startedAt = new Date().toISOString();
+  state.privacyAcceptedAt = new Date().toISOString();
   saveState();
   showValidation();
 }
@@ -143,7 +161,14 @@ function startValidation(event) {
 function resumeValidation() {
   const saved = readSavedState();
   if (!saved) return;
+  if (!dom.privacyConfirm.checked) {
+    dom.startError.textContent = "Confirma nuevamente la responsabilidad de uso para continuar.";
+    dom.privacyConfirm.focus();
+    return;
+  }
   state = sanitizeState(saved);
+  state.privacyAcceptedAt = new Date().toISOString();
+  saveState();
   if (state.completedAt) showSummary();
   else showValidation();
 }
@@ -155,6 +180,7 @@ function sanitizeState(candidate) {
   safe.startedAt = candidate.startedAt || new Date().toISOString();
   safe.completedAt = candidate.completedAt || null;
   safe.currentIndex = Math.max(0, Math.min(Number(candidate.currentIndex) || 0, questions.length - 1));
+  safe.privacyAcceptedAt = candidate.privacyAcceptedAt || null;
   questions.forEach((item) => {
     const answer = candidate.answers?.[item.id];
     if (!answer || !Object.values(STATUS).includes(answer.status)) return;
@@ -179,7 +205,7 @@ function showView(view) {
   dom.summaryView.hidden = view !== "summary";
   dom.headerProgress.hidden = view === "start";
   if (view === "start") prepareResume();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scrollTop();
 }
 
 function renderQuestion() {
@@ -216,6 +242,7 @@ function renderQuestion() {
   dom.previousButton.disabled = state.currentIndex === 0;
   dom.nextButton.textContent = number === questions.length ? "Ver resultado →" : "Siguiente →";
   dom.questionError.textContent = "";
+  updateSectionRail();
   updateLiveMetrics();
   saveState();
 }
@@ -280,17 +307,20 @@ function previousQuestion() {
   if (state.currentIndex === 0) return;
   state.currentIndex -= 1;
   renderQuestion();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scrollTop();
 }
 
 function nextQuestion() {
   if (!validateCurrentQuestion(true)) return;
   if (state.currentIndex === questions.length - 1) {
-    const unanswered = questions.filter((item) => !state.answers[item.id]?.status);
-    if (unanswered.length) {
-      state.currentIndex = questions.indexOf(unanswered[0]);
+    const invalid = questions.filter((item) => {
+      const answer = state.answers[item.id];
+      return !answer?.status || (answer.status === STATUS.FAIL && !answer.comment.trim());
+    });
+    if (invalid.length) {
+      state.currentIndex = questions.indexOf(invalid[0]);
       renderQuestion();
-      dom.questionError.textContent = `Faltan ${unanswered.length} controles por responder.`;
+      dom.questionError.textContent = `Faltan ${invalid.length} controles por completar correctamente.`;
       return;
     }
     state.completedAt = new Date().toISOString();
@@ -300,7 +330,7 @@ function nextQuestion() {
   }
   state.currentIndex += 1;
   renderQuestion();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scrollTop();
 }
 
 function calculateStats(items = questions) {
@@ -418,6 +448,13 @@ function buildExportPayload() {
     project: settings.title,
     campaign: checklist.campaign,
     privateNotice: checklist.privateNotice,
+    responsibility: {
+      accepted: Boolean(state.privacyAcceptedAt),
+      acceptedAt: state.privacyAcceptedAt,
+      storageMode: settings.privacy.storageMode,
+      retentionHours: settings.privacy.retentionHours,
+      exportWarning: settings.privacy.exportWarning,
+    },
     store: state.store,
     validator: state.validator,
     startedAt: state.startedAt,
@@ -453,7 +490,7 @@ function downloadResultJson() {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  showToast("JSON descargado. Ya puedes generar el PDF ejecutivo con Python.");
+  showToast("JSON descargado. Resguárdalo sólo en canales internos autorizados.");
 }
 
 function restartValidation() {
@@ -478,7 +515,7 @@ function openImageDialog() {
 }
 
 function handleKeyboard(event) {
-  if (dom.validationView.hidden || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (!settings.experience?.navigation?.keyboardShortcuts || dom.validationView.hidden || event.altKey || event.ctrlKey || event.metaKey) return;
   if (event.target.matches("input, textarea")) return;
   const map = { "1": STATUS.PASS, "0": STATUS.FAIL, "n": STATUS.NA, "N": STATUS.NA };
   if (map[event.key]) {
@@ -489,15 +526,152 @@ function handleKeyboard(event) {
 }
 
 function saveState() {
-  try { localStorage.setItem(settings.storageKey, JSON.stringify(state)); }
+  try {
+    localStorage.setItem(settings.storageKey, JSON.stringify(state));
+    if (dom.saveStatus) dom.saveStatus.textContent = "Avance guardado sólo en este dispositivo";
+  }
   catch (error) { console.warn("No se pudo guardar el avance local.", error); }
 }
 
 function readSavedState() {
   try {
     const raw = localStorage.getItem(settings.storageKey);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    if (!isSavedStateFresh(saved, settings.privacy?.retentionHours || 24)) {
+      localStorage.removeItem(settings.storageKey);
+      return null;
+    }
+    return saved;
   } catch { return null; }
+}
+
+function isSavedStateFresh(saved, retentionHours, now = Date.now()) {
+  const reference = Date.parse(saved?.completedAt || saved?.startedAt || "");
+  const age = now - reference;
+  const retentionMs = Number(retentionHours) * 60 * 60 * 1000;
+  return Number.isFinite(reference) && Number.isFinite(retentionMs) && retentionMs > 0 && age >= -5 * 60 * 1000 && age <= retentionMs;
+}
+
+function applyExperienceSettings() {
+  const theme = settings.experience?.theme || {};
+  const palette = theme.palette || {};
+  const cssVariables = {
+    green: "--green",
+    dark: "--dark",
+    orange: "--orange",
+    pumpkin: "--pumpkin",
+    cream: "--cream",
+    ink: "--ink",
+  };
+  Object.entries(cssVariables).forEach(([key, variable]) => {
+    const color = String(palette[key] || "");
+    if (/^#[0-9a-f]{6}$/i.test(color)) document.documentElement.style.setProperty(variable, color);
+  });
+
+  const copy = settings.experience?.copy || {};
+  dom.headerEyebrow.textContent = copy.eyebrow || "JUNTÉMONOS MÁS";
+  dom.startTitle.textContent = copy.heroTitle || "Fall ya está aquí.";
+  dom.heroIntro.textContent = copy.heroIntro || "Hagamos que esta temporada se viva en cada tienda.";
+  dom.heroPromise.textContent = copy.heroPromise || "Un recorrido rápido y objetivo.";
+  if (/^[a-z0-9_./-]+$/i.test(theme.heroImage || "")) dom.heroImage.src = theme.heroImage;
+
+  const privacy = settings.privacy;
+  dom.privacyClassification.textContent = privacy.classification;
+  dom.privacyNotice.textContent = privacy.shortNotice;
+  dom.responsibilityTitle.textContent = privacy.responsibilityTitle;
+  dom.responsibilityText.textContent = privacy.responsibilityText;
+  dom.retentionHours.textContent = `${privacy.retentionHours} horas`;
+  dom.summaryPrivacyWarning.textContent = privacy.exportWarning;
+  dom.prohibitedDataList.replaceChildren();
+  privacy.prohibitedData.forEach((text) => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    dom.prohibitedDataList.append(item);
+  });
+  dom.keyboardHint.hidden = !settings.experience?.navigation?.keyboardShortcuts;
+}
+
+function renderSectionRail() {
+  dom.sectionRail.hidden = !settings.experience?.navigation?.showSectionRail;
+  dom.sectionRail.replaceChildren();
+  checklist.sections.forEach((section, index) => {
+    const button = document.createElement("button");
+    const number = document.createElement("b");
+    const label = document.createElement("span");
+    button.type = "button";
+    button.className = "section-chip";
+    button.dataset.sectionId = section.id;
+    button.title = `Ir a ${section.title}`;
+    number.textContent = String(index + 1).padStart(2, "0");
+    label.textContent = section.title;
+    button.append(number, label);
+    dom.sectionRail.append(button);
+  });
+}
+
+function updateSectionRail() {
+  const current = questions[state.currentIndex];
+  dom.sectionRail.querySelectorAll("[data-section-id]").forEach((button) => {
+    const items = questions.filter((item) => item.sectionId === button.dataset.sectionId);
+    const complete = items.every((item) => state.answers[item.id]?.status);
+    const active = current.sectionId === button.dataset.sectionId;
+    button.classList.toggle("is-complete", complete);
+    button.classList.toggle("is-active", active);
+    if (active) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+  });
+  const active = dom.sectionRail.querySelector(".is-active");
+  active?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+}
+
+function handleSectionJump(event) {
+  const button = event.target.closest("[data-section-id]");
+  if (!button || !settings.experience?.navigation?.allowSectionJump) return;
+  const currentAnswer = state.answers[questions[state.currentIndex].id];
+  if (currentAnswer?.status === STATUS.FAIL && !currentAnswer.comment.trim()) {
+    dom.questionError.textContent = "Agrega una acción breve antes de cambiar de sección.";
+    dom.commentInput.focus();
+    return;
+  }
+  const items = questions.filter((item) => item.sectionId === button.dataset.sectionId);
+  const target = items.find((item) => !state.answers[item.id]?.status) || items[0];
+  state.currentIndex = questions.indexOf(target);
+  renderQuestion();
+  scrollTop();
+}
+
+function clearSavedValidation() {
+  if (!window.confirm("¿Borrar el recorrido guardado en este dispositivo? Esta acción no se puede deshacer.")) return;
+  localStorage.removeItem(settings.storageKey);
+  state = createEmptyState();
+  dom.startForm.reset();
+  dom.resumeButton.hidden = true;
+  dom.startError.textContent = "";
+  showToast("Datos locales eliminados de este dispositivo.");
+}
+
+function maybeShowPrivacyDialog() {
+  try {
+    if (sessionStorage.getItem(`${settings.appId}-privacy-seen`) !== "1") openPrivacyDialog();
+  } catch {
+    openPrivacyDialog();
+  }
+}
+
+function openPrivacyDialog() {
+  if (!dom.privacyDialog.open) dom.privacyDialog.showModal();
+}
+
+function closePrivacyDialog() {
+  if (dom.privacyDialog.open) dom.privacyDialog.close();
+  try { sessionStorage.setItem(`${settings.appId}-privacy-seen`, "1"); }
+  catch { /* El aviso sigue disponible desde encabezado y pie. */ }
+}
+
+function scrollTop() {
+  const behavior = settings.experience?.navigation?.scrollBehavior === "auto" ? "auto" : "smooth";
+  window.scrollTo({ top: 0, behavior });
 }
 
 function safeFilename(value) {

@@ -1,14 +1,56 @@
 {
+  "schemaVersion": 2,
   "appId": "validacion-campana-fall26",
   "title": "Validación Campaña",
   "campaign": "Fall 26",
   "expectedMinutes": "25–30",
   "storageKey": "validacion-campana-fall26-v1",
   "maxCommentLength": 120,
+  "experience": {
+    "theme": {
+      "name": "Fall 26 · Starbucks + Peanuts",
+      "palette": {
+        "green": "#006241",
+        "dark": "#003b2d",
+        "orange": "#d94f1d",
+        "pumpkin": "#f79435",
+        "cream": "#fff8ed",
+        "ink": "#2c2430"
+      },
+      "heroImage": "assets/reference/q07.webp"
+    },
+    "copy": {
+      "eyebrow": "JUNTÉMONOS MÁS",
+      "heroTitle": "Fall ya está aquí.",
+      "heroIntro": "Hagamos que esta temporada se viva en cada tienda.",
+      "heroPromise": "Un recorrido cálido, rápido y objetivo para reconocer lo que funciona y corregir lo necesario."
+    },
+    "navigation": {
+      "showSectionRail": true,
+      "allowSectionJump": true,
+      "keyboardShortcuts": true,
+      "scrollBehavior": "smooth"
+    }
+  },
   "statuses": {
     "cumple": { "label": "Cumple", "value": 1, "symbol": "✓" },
     "no_cumple": { "label": "No cumple", "value": 0, "symbol": "×" },
     "na": { "label": "No aplica", "value": null, "symbol": "•" }
   },
-  "privacy": "Información privada de la compañía. Uso exclusivo para validación operativa. Prohibida su divulgación."
+  "privacy": {
+    "classification": "USO INTERNO",
+    "shortNotice": "Información privada de la compañía · Prohibida su divulgación",
+    "responsibilityTitle": "Responsabilidad de uso",
+    "responsibilityText": "Confirmo que utilizaré esta herramienta únicamente para la operación autorizada, protegeré el material y resguardaré los resultados.",
+    "storageMode": "local_only",
+    "retentionHours": 24,
+    "requireAcceptanceEverySession": true,
+    "prohibitedData": [
+      "Datos personales de clientes o partners",
+      "Contraseñas, accesos o información financiera",
+      "Capturas o resultados en canales no autorizados"
+    ],
+    "exportWarning": "El JSON y el PDF deben permanecer únicamente en canales internos autorizados.",
+    "publicRepositoryWarning": "Este material no debe publicarse en repositorios o sitios de acceso abierto."
+  }
 }

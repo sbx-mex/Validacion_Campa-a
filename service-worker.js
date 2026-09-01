@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "validacion-fall26-v1";
+const CACHE_NAME = "validacion-fall26-v2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
