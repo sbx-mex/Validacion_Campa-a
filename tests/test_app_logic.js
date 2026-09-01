@@ -30,6 +30,8 @@ assert.equal(context.isSavedStateFresh(stale, 24, now), false, "Un recorrido may
 assert.equal(context.isSavedStateFresh(invalid, 24, now), false, "Una fecha inválida debe rechazarse.");
 assert.deepEqual(settingsFile.experience.navigation.autoAdvanceStatuses, ["cumple", "na"], "Cumple y No aplica deben avanzar solos.");
 assert.equal(settingsFile.experience.navigation.autoAdvanceDelayMs, 650, "La confirmación debe permanecer visible antes de avanzar.");
+assert.equal(context.buildPdfFilename("Tienda Centro 123"), "Tienda_Centro_123_Fall", "El PDF debe usar Tienda_Fall.");
+assert.equal(context.buildPdfFilename("Árbol / Norte"), "Arbol_Norte_Fall", "El nombre PDF debe ser seguro y conservar la tienda.");
 
 vm.runInContext(`
   questions = [{id:"q01"},{id:"q02"},{id:"q03"},{id:"q04"}];
@@ -53,4 +55,4 @@ assert.equal(
   "La navegación debe resolver los cinco momentos del Customer Journey.",
 );
 
-console.log("Lógica web válida: retención, Customer Journey, avance rápido, puntuación sin N/A y corrección inmediata.");
+console.log("Lógica web válida: retención, Customer Journey, exportación Tienda_Fall, puntuación sin N/A y corrección inmediata.");

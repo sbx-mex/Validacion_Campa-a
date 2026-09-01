@@ -49,7 +49,7 @@
     <section id="startView" class="view start-view" aria-labelledby="startTitle">
       <div class="hero-card">
         <div class="hero-art" aria-hidden="true">
-          <img id="heroImage" src="assets/reference/q07.webp" alt="">
+          <img id="heroImage" src="assets/ui/fall26-campaign-reference.webp" alt="">
           <span>Referencia oficial de campaña</span>
         </div>
         <div class="hero-copy">
@@ -244,6 +244,32 @@
     </div>
     <div class="privacy-storage"><span aria-hidden="true">◎</span><div><b>Sólo en este dispositivo</b><small>Sin envío a servicios externos · Retención máxima de 24 horas.</small></div></div>
     <button id="acknowledgePrivacy" class="primary-button" type="button">Confirmo el uso responsable</button>
+  </dialog>
+
+  <dialog id="exportDialog" class="export-dialog" aria-labelledby="exportTitle">
+    <button id="closeExportDialog" class="dialog-close" type="button" aria-label="Cerrar confirmación de exportación">×</button>
+    <div class="export-dialog-art">
+      <img id="exportImage" src="assets/ui/export-working.webp" alt="Personajes de la campaña Fall reunidos alrededor de una planta">
+      <span>FALL 26 · REGRESO AL ORIGEN</span>
+    </div>
+    <div class="export-dialog-copy">
+      <span id="exportEyebrow" class="campaign-pill">JUNTÉMONOS MÁS</span>
+      <h2 id="exportTitle">Estamos trabajando para ti</h2>
+      <p id="exportMessage">Prepararemos un resumen claro para reconocer lo logrado y atender cada oportunidad.</p>
+      <label id="exportCheckWrap" class="export-confirm">
+        <input id="exportConfirm" type="checkbox">
+        <span>Confirmo que revisé los acuerdos de los puntos No cumple.</span>
+      </label>
+      <div id="exportStatus" class="export-status" hidden role="status" aria-live="polite">
+        <i aria-hidden="true"></i><span>Preparando exportación segura...</span>
+      </div>
+      <aside id="exportOpportunityNote" class="export-opportunity-note" hidden></aside>
+      <div class="export-dialog-actions">
+        <button id="exportPrimary" class="primary-button" type="button">Preparar PDF</button>
+        <button id="exportSecondary" class="secondary-button" type="button">Revisar oportunidades</button>
+      </div>
+      <small id="exportPrivacy">Uso interno para revisión de campaña. Resguarda el PDF en canales autorizados.</small>
+    </div>
   </dialog>
 
   <dialog id="imageDialog" class="image-dialog">

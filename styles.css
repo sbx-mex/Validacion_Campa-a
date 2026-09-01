@@ -453,6 +453,166 @@ body {
 .privacy-storage small { color: #557067; font-size: 10px; }
 .privacy-dialog > .primary-button { width: 100%; margin-top: 16px; }
 
+.export-dialog {
+  width: min(860px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #2c2430;
+  border-radius: 28px;
+  background: #fffaf1;
+  color: var(--ink);
+  box-shadow: 10px 12px 0 rgba(44,36,48,.2), 0 34px 100px rgba(0,0,0,.38);
+}
+
+.export-dialog::backdrop {
+  background: rgba(0,38,28,.84);
+  backdrop-filter: blur(6px);
+}
+
+.export-dialog[open] {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(360px, 1.05fr);
+}
+
+.export-dialog-art {
+  position: relative;
+  min-height: 470px;
+  overflow: hidden;
+  background: var(--pumpkin);
+}
+
+.export-dialog-art::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 2px dashed rgba(255,255,255,.78);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.export-dialog-art img {
+  width: 100%;
+  height: 100%;
+  min-height: 470px;
+  object-fit: cover;
+}
+
+.export-dialog-art > span {
+  position: absolute;
+  z-index: 2;
+  left: 30px;
+  bottom: 28px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(0,59,45,.92);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+
+.export-dialog-copy {
+  display: flex;
+  min-width: 0;
+  padding: clamp(28px, 5vw, 48px);
+  flex-direction: column;
+  justify-content: center;
+}
+
+.export-dialog-copy h2 {
+  margin: 15px 0 9px;
+  color: var(--dark);
+  font-size: clamp(30px, 4.5vw, 45px);
+  line-height: .98;
+  letter-spacing: -.04em;
+}
+
+.export-dialog-copy > p {
+  margin: 0;
+  color: #59655f;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.export-confirm {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid #a9c8bb;
+  border-radius: 14px;
+  background: #eef8f3;
+  color: #39554a;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.4;
+}
+
+.export-confirm input {
+  flex: 0 0 21px;
+  width: 21px;
+  height: 21px;
+  accent-color: var(--green);
+}
+
+.export-status {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 15px;
+  background: #fff0e5;
+  color: #8e3a1d;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.export-status i {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #f1bd98;
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: export-spin .75s linear infinite;
+}
+
+@keyframes export-spin { to { transform: rotate(360deg); } }
+
+.export-opportunity-note {
+  margin-top: 18px;
+  padding: 14px 15px;
+  border-left: 5px solid var(--orange);
+  border-radius: 13px;
+  background: #fff0e5;
+  color: #70432f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.export-dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.export-dialog-actions button {
+  min-height: 48px;
+  padding-inline: 13px;
+}
+
+.export-dialog-copy > small {
+  display: block;
+  margin-top: 13px;
+  color: #756d68;
+  font-size: 8.5px;
+  line-height: 1.4;
+}
+
 @media (max-width: 760px) {
   .privacy-bar { min-height: 38px; }
   .privacy-bar #privacyNotice { display: none; }
@@ -469,13 +629,18 @@ body {
   .strengths-list { grid-template-columns: 1fr; }
   .question-nav { position: sticky; z-index: 20; bottom: 8px; padding: 8px; border: 1px solid #d8c7b3; border-radius: 16px; background: rgba(255,250,241,.95); box-shadow: 0 10px 30px rgba(44,36,48,.18); backdrop-filter: blur(8px); }
   .summary-privacy-note { align-items: flex-start; flex-direction: column; }
+  .export-dialog[open] { grid-template-columns: 1fr; }
+  .export-dialog-art { min-height: 210px; max-height: 34dvh; }
+  .export-dialog-art img { min-height: 210px; max-height: 34dvh; }
+  .export-dialog-copy { padding: 25px 22px max(25px, env(safe-area-inset-bottom)); }
+  .export-dialog-copy h2 { font-size: 32px; }
 }
 
 @media print {
-  .responsibility-card, .responsibility-confirm, .save-status, .section-rail, .response-guidance, .summary-privacy-note, .privacy-dialog { display: none !important; }
+  .responsibility-card, .responsibility-confirm, .save-status, .section-rail, .response-guidance, .summary-privacy-note, .privacy-dialog, .export-dialog { display: none !important; }
 }
 
-/* v5 · Customer Journey cálido, táctil y compatible con iOS */
+/* v6 · Customer Journey cálido, exportación guiada e iOS */
 html {
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 130px;

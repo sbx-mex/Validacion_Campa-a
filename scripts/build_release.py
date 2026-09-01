@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "MANIFEST.sha256"
-EXCLUDED_DIRS = {".git", "__pycache__", ".idea", ".vscode"}
+EXCLUDED_DIRS = {".git", "__pycache__", ".idea", ".vscode", "tmp"}
 EXCLUDED_NAMES = {".DS_Store", "MANIFEST.sha256"}
 FORBIDDEN_SUFFIXES = {".zip", ".jpg", ".jpeg"}
 

@@ -6,10 +6,13 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import unicodedata
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
+from PIL import Image as PillowImage
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
@@ -20,6 +23,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
+    Image as ReportImage,
     PageTemplate,
     Paragraph,
     Spacer,
@@ -58,13 +62,19 @@ pdfmetrics.registerFont(TTFont(BOLD, str(FONT_DIR / "DejaVuSans-Bold.ttf")))
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True, help="Archivo de resultados de Validación Campaña.")
-    parser.add_argument("--output", type=Path, required=True, help="Ruta del PDF de salida.")
+    parser.add_argument("--output", type=Path, help="Ruta del PDF. Si se omite: output/pdf/Tienda_Fall.pdf.")
     return parser.parse_args()
 
 
 def safe_text(value: Any, limit: int = 180) -> str:
     text = " ".join(str(value or "").split())[:limit]
-    return text.replace("\u2011", "-").replace("\u2013", "-").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return text.replace("\u2011", "-").replace("\u2013", "-").replace("\u2014", "-").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def safe_filename_part(value: Any, fallback: str = "Tienda") -> str:
+    ascii_value = unicodedata.normalize("NFKD", str(value or "")).encode("ascii", "ignore").decode("ascii")
+    normalized = re.sub(r"[^A-Za-z0-9_-]+", "_", ascii_value.strip())
+    return normalized.strip("_")[:54] or fallback
 
 
 def load_payload(path: Path) -> dict[str, Any]:
@@ -203,6 +213,16 @@ def journey_card(stage: dict[str, Any], styles: dict[str, ParagraphStyle]) -> Ta
     return card
 
 
+def compact_report_image(path: Path, width: float, height: float) -> ReportImage:
+    buffer = BytesIO()
+    with PillowImage.open(path) as opened:
+        image = opened.convert("RGB")
+        image.thumbnail((480, 270), PillowImage.Resampling.LANCZOS)
+        image.save(buffer, "JPEG", quality=82, optimize=True, progressive=True)
+    buffer.seek(0)
+    return ReportImage(buffer, width=width, height=height)
+
+
 def build_report(payload: dict[str, Any], output_path: Path) -> None:
     corrective_actions, catalog, stage_definitions = load_catalog()
     answers = enrich_answers(payload["answers"], catalog)
@@ -281,13 +301,23 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         strength_names += f" · y {len(strengths) - 6} más"
     if not strength_names:
         strength_names = "Los puntos corregidos aparecerán aquí en la siguiente validación."
-    recognition = Table([[
+    recognition_image = ROOT / "assets" / "ui" / "export-complete.webp"
+    recognition_cells = [
         Paragraph(f"{len(strengths)}<br/><font size='7'>PUNTOS A FAVOR</font>", styles["white"]),
-        Paragraph(f"<b>Reconozcamos al equipo</b><br/>{strength_names}", styles["warm"]),
-    ]], colWidths=[39 * mm, doc.width - 39 * mm])
+        Paragraph(
+            f"<b>Reconozcamos al equipo</b><br/>{strength_names}<br/>"
+            "<font color='#006241'>Atiende las oportunidades lo antes posible y comparte los acuerdos con tu DM.</font>",
+            styles["warm"],
+        ),
+    ]
+    recognition_widths = [34 * mm, doc.width - 34 * mm]
+    if recognition_image.is_file():
+        recognition_cells.append(compact_report_image(recognition_image, width=40 * mm, height=22.5 * mm))
+        recognition_widths = [31 * mm, doc.width - 74 * mm, 43 * mm]
+    recognition = Table([recognition_cells], colWidths=recognition_widths)
     recognition.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (0, 0), GREEN),
-        ("BACKGROUND", (1, 0), (1, 0), colors.HexColor("#EEF8F3")),
+        ("BACKGROUND", (1, 0), (-1, 0), colors.HexColor("#EEF8F3")),
         ("BOX", (0, 0), (-1, -1), .7, colors.HexColor("#8DB9A6")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
@@ -338,9 +368,9 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
 def main() -> None:
     args = parse_args()
     payload = load_payload(args.input)
-    build_report(payload, args.output)
-    safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", args.output.name)
-    print(f"Reporte generado: {args.output.parent / safe_name}")
+    output = args.output or ROOT / "output" / "pdf" / f"{safe_filename_part(payload.get('store'))}_Fall.pdf"
+    build_report(payload, output)
+    print(f"Reporte generado: {output}")
 
 
 if __name__ == "__main__":

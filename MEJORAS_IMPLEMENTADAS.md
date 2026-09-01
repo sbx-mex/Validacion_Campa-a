@@ -33,8 +33,19 @@
 25. Resumen de campaña agrupado por momento del Customer Journey para localizar oportunidades más rápido.
 26. Cada oportunidad conserva la corrección sugerida y el acuerdo capturado.
 27. Botón **Ajustar acuerdo** para volver directamente al punto y corregir el seguimiento antes de exportar.
-28. Nombre de archivo PDF automático con tienda y fecha al usar la exportación rápida.
+28. Nombre de archivo PDF automático por tienda al usar la exportación rápida.
 29. Reporte Python con ruta de mejora, responsable y fecha de cierre.
 30. Metaetiquetas, áreas seguras y controles táctiles optimizados para iPhone y iPad.
 31. Iconos nítidos de 180, 192 y 512 px generados con Python y disponibles sin conexión.
-32. Caché PWA v5 con todos los recursos críticos del recorrido.
+32. Caché PWA con todos los recursos críticos del recorrido.
+
+## Exportación cálida
+
+33. Confirmación obligatoria antes de exportar para asegurar que los acuerdos fueron revisados.
+34. Estado visual “Estamos trabajando para ti” mientras se prepara el reporte.
+35. Agradecimiento posterior con reconocimiento y acceso directo a las oportunidades.
+36. Mensajes, imágenes y acciones de exportación administrados desde `data/export_experience.json`.
+37. Nombre de PDF dinámico y seguro en formato `Tienda_Fall.pdf`.
+38. Tres recursos WebP creados con Python desde la referencia oficial de campaña.
+39. Cierre cálido en el PDF con acciones recomendadas y seguimiento con el DM.
+40. Caché PWA v6 para conservar la nueva experiencia completa sin conexión.

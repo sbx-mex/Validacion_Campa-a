@@ -13,6 +13,7 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 - Navegación por cinco momentos del Customer Journey: Prepara, Llega, Elige, Vive y Disfruta.
 - **Cumple** y **No aplica** avanzan automáticamente; **No cumple** se detiene para definir una acción.
 - Corrección inmediata sugerida al seleccionar **No cumple** y reconocimiento al seleccionar **Cumple**.
+- Confirmación cálida antes de exportar y agradecimiento posterior con enfoque en la ruta de mejora.
 - Aviso de responsabilidad obligatorio al iniciar o reanudar.
 - Retención local máxima de 24 horas y botón para borrar el recorrido del dispositivo.
 - Cero servicios externos: la aplicación no transmite los datos capturados.
@@ -25,7 +26,8 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
    - **No cumple = 0** y requiere una acción breve.
    - **No aplica** queda fuera del cálculo.
 3. Revisa primero los puntos a favor y después la ruta de mejora.
-4. Ajusta cualquier acuerdo desde el resumen antes de exportar el PDF.
+4. Ajusta cualquier acuerdo desde el resumen y confirma la revisión antes de exportar.
+5. El PDF propone automáticamente el nombre `Tienda_Fall.pdf` y muestra un cierre de agradecimiento.
 
 La tasa de éxito se calcula así:
 
@@ -51,11 +53,18 @@ Para validar el motor y generar el reporte ejecutivo de ejemplo:
 
 ```bash
 python scripts/generate_store_report.py \
-  --input sample/ejemplo_resultado.json \
-  --output output/pdf/Reporte_Ejemplo_Fall26.pdf
+  --input sample/ejemplo_resultado.json
 ```
 
 El reporte reconoce los puntos **Cumple**, muestra la tasa de éxito por momento del Customer Journey y conserva una ruta de mejora con acción, acuerdo, responsable y fecha.
+
+La portada y los dos momentos de exportación se construyen desde la referencia oficial proporcionada:
+
+```bash
+python scripts/prepare_campaign_ui.py \
+  --source "Referencia oficial de campaña.jpeg" \
+  --output-dir assets/ui
+```
 
 ## iPhone y iPad
 

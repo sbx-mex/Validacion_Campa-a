@@ -3,6 +3,7 @@
 const PATHS = {
   checklist: "data/fall26_checklist.json",
   settings: "config/settings.json",
+  exportExperience: "data/export_experience.json",
 };
 
 const STATUS = Object.freeze({
@@ -14,20 +15,23 @@ const STATUS = Object.freeze({
 const dom = {};
 let settings;
 let checklist;
+let exportExperience;
 let questions = [];
 let state;
 let toastTimer;
 let autoAdvanceTimer;
 let editingOpportunityId = null;
+let exportStage = "before";
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   bindDom();
   try {
-    [settings, checklist] = await Promise.all([
+    [settings, checklist, exportExperience] = await Promise.all([
       fetchJson(PATHS.settings),
       fetchJson(PATHS.checklist),
+      fetchJson(PATHS.exportExperience),
     ]);
     questions = flattenChecklist(checklist);
     applyExperienceSettings();
@@ -61,6 +65,8 @@ function bindDom() {
     "retentionHours", "responsibilityTitle", "responsibilityText", "clearLocalData", "sectionRail",
     "saveStatus", "summaryPrivacyWarning", "openPrivacy", "openPrivacyFooter",
     "privacyDialog", "closePrivacyDialog", "acknowledgePrivacy",
+    "exportDialog", "closeExportDialog", "exportImage", "exportEyebrow", "exportTitle", "exportMessage",
+    "exportCheckWrap", "exportConfirm", "exportStatus", "exportOpportunityNote", "exportPrimary", "exportSecondary", "exportPrivacy",
   ];
   ids.forEach((id) => { dom[id] = document.getElementById(id); });
 }
@@ -82,6 +88,7 @@ function flattenChecklist(data) {
 
 function validateContent() {
   if (!settings?.storageKey || !settings?.privacy?.responsibilityText || !Array.isArray(checklist?.sections)) throw new Error("Configuración incompleta.");
+  if (!exportExperience?.before?.title || !exportExperience?.after?.title || !exportExperience?.theme?.workingImage) throw new Error("Experiencia de exportación incompleta.");
   if (!Array.isArray(checklist?.journeyStages) || checklist.journeyStages.length !== 5) throw new Error("El Customer Journey debe contener cinco momentos.");
   if (questions.length !== 36) throw new Error(`Se esperaban 36 controles y se encontraron ${questions.length}.`);
   const ids = new Set(questions.map((item) => item.id));
@@ -126,7 +133,7 @@ function bindEvents() {
     if (event.target === dom.imageDialog) dom.imageDialog.close();
   });
   dom.applyCorrection.addEventListener("click", applySuggestedCorrection);
-  dom.printReport.addEventListener("click", exportSummaryPdf);
+  dom.printReport.addEventListener("click", openExportConfirmation);
   dom.opportunitiesList.addEventListener("click", handleOpportunityEdit);
   dom.restartButton.addEventListener("click", restartValidation);
   dom.clearLocalData.addEventListener("click", clearSavedValidation);
@@ -137,6 +144,12 @@ function bindEvents() {
   dom.acknowledgePrivacy.addEventListener("click", closePrivacyDialog);
   dom.privacyDialog.addEventListener("click", (event) => {
     if (event.target === dom.privacyDialog) closePrivacyDialog();
+  });
+  dom.closeExportDialog.addEventListener("click", closeExportDialog);
+  dom.exportPrimary.addEventListener("click", handleExportPrimary);
+  dom.exportSecondary.addEventListener("click", handleExportSecondary);
+  dom.exportDialog.addEventListener("click", (event) => {
+    if (event.target === dom.exportDialog && exportStage !== "working") closeExportDialog();
   });
   document.addEventListener("keydown", handleKeyboard);
 }
@@ -567,13 +580,95 @@ function handleOpportunityEdit(event) {
   showToast("Ajusta el acuerdo y continúa. La oportunidad se conservará en el resumen.");
 }
 
+function buildPdfFilename(storeName) {
+  const store = String(storeName || "Tienda").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 54) || "Tienda";
+  return `${store}_Fall`;
+}
+
 function exportSummaryPdf() {
   const originalTitle = document.title;
-  const store = String(state.store || "Tienda").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Za-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "Tienda";
-  document.title = `Fall26_${store}_${new Date().toISOString().slice(0, 10)}`;
+  document.title = buildPdfFilename(state.store);
   window.print();
   setTimeout(() => { document.title = originalTitle; }, 1500);
+}
+
+function openExportConfirmation() {
+  renderExportStage("before");
+  if (!dom.exportDialog.open) dom.exportDialog.showModal();
+}
+
+function closeExportDialog() {
+  if (exportStage === "working") return;
+  if (dom.exportDialog.open) dom.exportDialog.close();
+}
+
+function renderExportStage(stage) {
+  exportStage = stage;
+  const content = exportExperience[stage];
+  const imageKey = stage === "after" ? "completeImage" : "workingImage";
+  dom.exportEyebrow.textContent = content.eyebrow;
+  dom.exportTitle.textContent = content.title;
+  dom.exportMessage.textContent = content.message;
+  dom.exportImage.src = exportExperience.theme[imageKey];
+  dom.exportImage.alt = stage === "after"
+    ? "Personajes de la campaña Fall reunidos para reconocer el recorrido"
+    : "Snoopy y Woodstock cuidando una planta durante la preparación del reporte";
+  dom.exportCheckWrap.hidden = stage !== "before";
+  dom.exportStatus.hidden = stage !== "working";
+  dom.exportOpportunityNote.hidden = stage !== "after";
+  dom.exportPrimary.hidden = stage === "working";
+  dom.exportSecondary.hidden = stage === "working";
+  dom.closeExportDialog.hidden = stage === "working";
+  dom.exportPrivacy.textContent = exportExperience.privacy.notice;
+
+  if (stage === "before") {
+    dom.exportConfirm.checked = false;
+    dom.exportCheckWrap.querySelector("span").textContent = content.checkLabel;
+    dom.exportPrimary.textContent = content.primaryAction;
+    dom.exportSecondary.textContent = content.secondaryAction;
+  } else if (stage === "working") {
+    dom.exportStatus.querySelector("span").textContent = content.status;
+  } else {
+    const opportunities = calculateStats().fail;
+    dom.exportOpportunityNote.textContent = opportunities
+      ? `${opportunities} ${opportunities === 1 ? "oportunidad queda" : "oportunidades quedan"} en tu ruta de mejora. ${content.opportunityMessage}`
+      : "El recorrido no registra oportunidades pendientes. Reconoce al equipo y mantén el estándar.";
+    dom.exportPrimary.textContent = opportunities ? content.primaryAction : "Reconocer puntos a favor";
+    dom.exportSecondary.textContent = content.secondaryAction;
+  }
+}
+
+async function handleExportPrimary() {
+  if (exportStage === "before") {
+    if (!dom.exportConfirm.checked) {
+      showToast("Confirma que revisaste los acuerdos antes de preparar el PDF.");
+      dom.exportConfirm.focus();
+      return;
+    }
+    renderExportStage("working");
+    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 420)));
+    exportSummaryPdf();
+    renderExportStage("after");
+    return;
+  }
+  if (exportStage === "after") {
+    const hasOpportunities = calculateStats().fail > 0;
+    closeExportDialog();
+    const destination = hasOpportunities ? dom.opportunitiesList : dom.strengthsList;
+    destination.scrollIntoView({ behavior: "smooth", block: "start" });
+    destination.querySelector("button")?.focus();
+  }
+}
+
+function handleExportSecondary() {
+  if (exportStage === "before") {
+    closeExportDialog();
+    dom.opportunitiesList.scrollIntoView({ behavior: "smooth", block: "start" });
+    dom.opportunitiesList.querySelector("button")?.focus();
+    return;
+  }
+  closeExportDialog();
 }
 
 function restartValidation() {

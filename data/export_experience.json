@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "campaign": "Fall 26",
+  "theme": {
+    "name": "Juntémonos Más · Regreso al origen",
+    "campaignImage": "assets/ui/fall26-campaign-reference.webp",
+    "workingImage": "assets/ui/export-working.webp",
+    "completeImage": "assets/ui/export-complete.webp"
+  },
+  "before": {
+    "eyebrow": "JUNTÉMONOS MÁS",
+    "title": "Estamos trabajando para ti",
+    "message": "Prepararemos un resumen claro para reconocer lo logrado y atender cada oportunidad.",
+    "checkLabel": "Confirmo que revisé los acuerdos de los puntos No cumple.",
+    "primaryAction": "Preparar PDF",
+    "secondaryAction": "Revisar oportunidades"
+  },
+  "working": {
+    "eyebrow": "UN MOMENTO, PARTNER",
+    "title": "Estamos preparando tu reporte",
+    "message": "Ordenamos el Customer Journey, los puntos a favor y la ruta de mejora.",
+    "status": "Preparando exportación segura..."
+  },
+  "after": {
+    "eyebrow": "GRACIAS POR CUIDAR CADA DETALLE",
+    "title": "Juntos hacemos mejor el recorrido",
+    "message": "Reconoce al equipo por lo logrado y atiende las oportunidades lo antes posible.",
+    "opportunityMessage": "Comparte los acuerdos y acciones recomendadas con tu DM por un canal interno autorizado.",
+    "primaryAction": "Volver a oportunidades",
+    "secondaryAction": "Finalizar"
+  },
+  "privacy": {
+    "notice": "Uso interno para revisión de campaña. Resguarda el PDF en canales autorizados.",
+    "ownership": "La información publicada es propiedad de la marca y está prohibida su divulgación.",
+    "copyright": "Copyright 2026 © Starbucks México"
+  }
+}

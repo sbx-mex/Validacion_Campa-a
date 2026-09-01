@@ -30,6 +30,7 @@ def main() -> None:
     checklist = load_json("data/fall26_checklist.json")
     settings = load_json("config/settings.json")
     manifest = load_json("manifest.webmanifest")
+    export_experience = load_json("data/export_experience.json")
     sections = checklist["sections"]
     journey_stages = checklist["journeyStages"]
     items = [item for section in sections for item in section["items"]]
@@ -50,7 +51,7 @@ def main() -> None:
     require(settings["privacy"]["storageMode"] == "local_only", "Los resultados deben guardarse sólo localmente.")
     require(0 < settings["privacy"]["retentionHours"] <= 24, "La retención local no puede superar 24 horas.")
     require(settings["privacy"]["requireAcceptanceEverySession"] is True, "Debe confirmarse la responsabilidad en cada sesión.")
-    require(settings["experience"]["theme"]["heroImage"] == "assets/reference/q07.webp", "La portada debe usar la referencia Peanuts ya autorizada.")
+    require(settings["experience"]["theme"]["heroImage"] == "assets/ui/fall26-campaign-reference.webp", "La portada debe usar la referencia oficial Fall optimizada.")
     require(settings["experience"]["navigation"].get("showImmediateGuidance") is True, "La guía inmediata debe permanecer activa.")
     require(settings["experience"]["navigation"].get("style") == "customer_journey", "La navegación debe usar Customer Journey.")
     require(settings["experience"].get("ios", {}).get("minimumTouchTarget") == 48, "Los controles táctiles deben medir al menos 48 px.")
@@ -60,6 +61,9 @@ def main() -> None:
     corrective_actions = checklist.get("guidance", {}).get("correctiveActions", {})
     require(set(corrective_actions) == {item["id"] for item in items}, "Cada control debe tener una corrección inmediata única.")
     require(all(len(str(action).strip()) >= 25 for action in corrective_actions.values()), "Las correcciones inmediatas deben ser claras y accionables.")
+    require(export_experience.get("schemaVersion") == 1, "La experiencia de exportación debe usar schemaVersion 1.")
+    require(export_experience["before"]["title"] == "Estamos trabajando para ti", "Falta el mensaje cálido previo a la exportación.")
+    require("DM" in export_experience["after"]["opportunityMessage"], "El cierre debe orientar el seguimiento con el DM.")
 
     referenced = []
     for item in items:
@@ -78,7 +82,9 @@ def main() -> None:
     required_files = [
         "index.html", "styles.css", "app.js", "service-worker.js", "manifest.webmanifest",
         "assets/icons/icon.svg", "assets/icons/apple-touch-icon.png", "assets/icons/icon-192.png", "assets/icons/icon-512.png",
-        "scripts/build_ios_assets.py", "scripts/generate_store_report.py", "scripts/optimize_validation_images.py", "scripts/scoring.py", "PRIVACIDAD.md",
+        "assets/ui/fall26-campaign-reference.webp", "assets/ui/export-working.webp", "assets/ui/export-complete.webp",
+        "data/export_experience.json", "scripts/build_ios_assets.py", "scripts/prepare_campaign_ui.py",
+        "scripts/generate_store_report.py", "scripts/optimize_validation_images.py", "scripts/scoring.py", "PRIVACIDAD.md",
     ]
     for relative in required_files:
         require((ROOT / relative).is_file(), f"Falta {relative}.")
@@ -92,6 +98,13 @@ def main() -> None:
     ]:
         with Image.open(ROOT / relative) as opened:
             require(opened.size == expected_size, f"Tamaño inválido en {relative}.")
+    for relative, expected_size in [
+        ("assets/ui/fall26-campaign-reference.webp", (1200, 1200)),
+        ("assets/ui/export-working.webp", (960, 600)),
+        ("assets/ui/export-complete.webp", (960, 540)),
+    ]:
+        with Image.open(ROOT / relative) as opened:
+            require(opened.format == "WEBP" and opened.size == expected_size, f"Recurso de campaña inválido: {relative}.")
 
     html_text = (ROOT / "index.html").read_text(encoding="utf-8")
     app_text = (ROOT / "app.js").read_text(encoding="utf-8")
@@ -104,7 +117,8 @@ def main() -> None:
     require('id="storeInput"' in web_text and 'id="validatorInput"' in web_text, "Faltan los dos datos de identidad permitidos.")
     for required_id in [
         "privacyDialog", "responsibilityText", "clearLocalData", "sectionRail", "summaryPrivacyWarning",
-        "responseGuidance", "applyCorrection", "strengthCount", "strengthsList",
+        "responseGuidance", "applyCorrection", "strengthCount", "strengthsList", "exportDialog",
+        "exportConfirm", "exportPrimary", "exportSecondary", "exportOpportunityNote",
     ]:
         require(f'id="{required_id}"' in web_text, f"Falta el control de experiencia/privacidad {required_id}.")
     require("Descargar JSON" not in html_text and "El JSON descargado" not in html_text, "La interfaz no debe mostrar descarga o instrucción JSON.")
@@ -112,6 +126,8 @@ def main() -> None:
     require("retentionHours" in app_text, "La aplicación debe aplicar retención local.")
     require("scheduleAutoAdvance" in app_text and "cancelAutoAdvance" in app_text, "Falta navegación automática segura.")
     require("renderJourneyStages" in app_text and "data-edit-question" in app_text, "Falta resumen por Customer Journey o edición de acuerdos.")
+    require("openExportConfirmation" in app_text and "renderExportStage" in app_text, "Falta confirmación antes y después de exportar.")
+    require("buildPdfFilename" in app_text and "_Fall" in app_text, "Falta nombre dinámico Tienda_Fall.")
     require('apple-mobile-web-app-capable' in html_text and 'apple-touch-icon' in html_text, "Falta compatibilidad iOS instalada.")
     dom_block = re.search(r"const ids = \[(.*?)\];", app_text, re.DOTALL)
     require(dom_block is not None, "No se encontró el contrato de elementos DOM.")
@@ -119,9 +135,12 @@ def main() -> None:
     missing_dom = [element_id for element_id in dom_ids if f'id="{element_id}"' not in html_text]
     require(not missing_dom, f"Faltan elementos DOM declarados en app.js: {missing_dom}")
     service_worker = (ROOT / "service-worker.js").read_text(encoding="utf-8")
-    require("validacion-fall26-v5" in service_worker, "La caché offline debe apuntar a la versión 5.")
+    require("validacion-fall26-v6" in service_worker, "La caché offline debe apuntar a la versión 6.")
     for icon in ["apple-touch-icon.png", "icon-192.png", "icon-512.png"]:
         require(icon in service_worker, f"El icono iOS/PWA no está disponible offline: {icon}.")
+    for asset in ["data/export_experience.json", "fall26-campaign-reference.webp", "export-working.webp", "export-complete.webp"]:
+        require(asset in service_worker, f"La experiencia de exportación no está disponible offline: {asset}.")
+    require("Damos_Seguimiento.webp" not in web_text and "Un_placer_haber_Ayudado.webp" not in web_text, "No deben usarse recursos ajenos a la campaña oficial.")
     for image in referenced:
         require(f'"{Path(image).stem}"' in service_worker, f"La referencia offline no está declarada: {image}.")
     forbidden_sources = [path for path in ROOT.rglob("*") if path.is_file() and path.suffix.lower() in {".zip", ".jpg", ".jpeg"}]
