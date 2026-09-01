@@ -46,6 +46,11 @@ def main() -> None:
     require(0 < settings["privacy"]["retentionHours"] <= 24, "La retención local no puede superar 24 horas.")
     require(settings["privacy"]["requireAcceptanceEverySession"] is True, "Debe confirmarse la responsabilidad en cada sesión.")
     require(settings["experience"]["theme"]["heroImage"] == "assets/reference/q07.webp", "La portada debe usar la referencia Peanuts ya autorizada.")
+    require(settings["experience"]["navigation"].get("showImmediateGuidance") is True, "La guía inmediata debe permanecer activa.")
+
+    corrective_actions = checklist.get("guidance", {}).get("correctiveActions", {})
+    require(set(corrective_actions) == {item["id"] for item in items}, "Cada control debe tener una corrección inmediata única.")
+    require(all(len(str(action).strip()) >= 25 for action in corrective_actions.values()), "Las correcciones inmediatas deben ser claras y accionables.")
 
     referenced = []
     for item in items:
@@ -75,8 +80,13 @@ def main() -> None:
     require("Información privada" in web_text, "La interfaz debe mostrar el aviso de privacidad.")
     require(not re.search(r"https?://", web_text, re.IGNORECASE), "La aplicación no debe depender de recursos externos.")
     require('id="storeInput"' in web_text and 'id="validatorInput"' in web_text, "Faltan los dos datos de identidad permitidos.")
-    for required_id in ["privacyDialog", "responsibilityText", "clearLocalData", "sectionRail", "summaryPrivacyWarning"]:
+    for required_id in [
+        "privacyDialog", "responsibilityText", "clearLocalData", "sectionRail", "summaryPrivacyWarning",
+        "responseGuidance", "applyCorrection", "strengthCount", "strengthsList",
+    ]:
         require(f'id="{required_id}"' in web_text, f"Falta el control de experiencia/privacidad {required_id}.")
+    require("Descargar JSON" not in html_text and "El JSON descargado" not in html_text, "La interfaz no debe mostrar descarga o instrucción JSON.")
+    require("downloadResultJson" not in app_text, "El motor web no debe conservar la descarga JSON visible.")
     require("retentionHours" in app_text, "La aplicación debe aplicar retención local.")
     dom_block = re.search(r"const ids = \[(.*?)\];", app_text, re.DOTALL)
     require(dom_block is not None, "No se encontró el contrato de elementos DOM.")

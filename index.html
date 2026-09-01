@@ -151,6 +151,7 @@
         </div>
 
         <div class="question-copy">
+          <span class="validation-prompt">OBSERVA · COMPARA · RESPONDE</span>
           <h2 id="questionText">¿Pregunta?</h2>
           <p id="criterionText">Criterio observable.</p>
         </div>
@@ -161,6 +162,14 @@
           <button class="choice choice-fail" type="button" data-status="no_cumple"><b>×</b><span>No cumple<small>0 puntos</small></span></button>
           <button class="choice choice-na" type="button" data-status="na"><b>•</b><span>No aplica<small>No pondera</small></span></button>
         </fieldset>
+        <section id="responseGuidance" class="response-guidance" hidden aria-live="polite">
+          <span id="responseGuidanceIcon" class="response-guidance-icon" aria-hidden="true">✓</span>
+          <div>
+            <strong id="responseGuidanceTitle">¡Bien hecho!</strong>
+            <p id="responseGuidanceText"></p>
+            <button id="applyCorrection" class="guidance-action" type="button" hidden>Usar esta corrección</button>
+          </div>
+        </section>
         <p id="keyboardHint" class="keyboard-hint">Atajos: <kbd>1</kbd> Cumple · <kbd>0</kbd> No cumple · <kbd>N</kbd> No aplica</p>
 
         <label id="commentWrap" class="comment-wrap">
@@ -205,18 +214,21 @@
         <div id="sectionResults" class="section-results"></div>
       </section>
 
+      <section class="summary-panel strengths-panel" aria-labelledby="strengthsTitle">
+        <div class="panel-heading"><div><span>RECONOZCAMOS AL EQUIPO</span><h3 id="strengthsTitle">Puntos a favor</h3></div><strong id="strengthCount">0</strong></div>
+        <div id="strengthsList" class="strengths-list"></div>
+      </section>
+
       <section class="summary-panel" aria-labelledby="opportunitiesTitle">
         <div class="panel-heading"><div><span>MEJORA CONTINUA</span><h3 id="opportunitiesTitle">Oportunidades detectadas</h3></div><strong id="opportunityCount">0</strong></div>
         <div id="opportunitiesList" class="opportunities-list"></div>
       </section>
 
       <div class="summary-actions">
-        <button id="downloadJson" class="primary-button" type="button">Descargar JSON</button>
-        <button id="printReport" class="secondary-button" type="button">Guardar resumen PDF</button>
+        <button id="printReport" class="primary-button" type="button">Guardar resumen PDF</button>
         <button id="restartButton" class="text-button" type="button">Nueva validación</button>
       </div>
-      <aside class="summary-privacy-note"><b>Uso responsable</b><span id="summaryPrivacyWarning">El JSON y el PDF deben permanecer únicamente en canales internos autorizados.</span></aside>
-      <p class="python-note">El JSON descargado puede convertirse en PDF ejecutivo con <code>python scripts/generate_store_report.py</code>.</p>
+      <aside class="summary-privacy-note"><b>Uso responsable</b><span id="summaryPrivacyWarning">El reporte debe permanecer únicamente en canales internos autorizados.</span></aside>
     </section>
   </main>
 
@@ -236,7 +248,7 @@
     <ol>
       <li><b>Registra sólo lo necesario:</b> tienda, responsable y observaciones operativas.</li>
       <li><b>No captures datos personales:</b> evita nombres de clientes, teléfonos, correos o fotografías de personas.</li>
-      <li><b>Resguarda las descargas:</b> comparte JSON y PDF únicamente por canales internos autorizados.</li>
+      <li><b>Resguarda el reporte:</b> compártelo únicamente por canales internos autorizados.</li>
       <li><b>Evita exposición pública:</b> no publiques materiales ni resultados en repositorios o sitios abiertos.</li>
     </ol>
     <div class="privacy-storage"><span aria-hidden="true">◎</span><div><b>Guardado local</b><small>La aplicación no envía datos a servicios externos.</small></div></div>

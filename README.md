@@ -11,6 +11,7 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 - Estética cálida Starbucks + Peanuts basada en la referencia oficial ya incluida en el proyecto.
 - Portada, mensajes y paleta controlados desde `config/settings.json`.
 - Navegación por nueve bloques, avance local y atajos `1`, `0` y `N`.
+- Corrección inmediata sugerida al seleccionar **No cumple** y reconocimiento al seleccionar **Cumple**.
 - Aviso de responsabilidad obligatorio al iniciar o reanudar.
 - Retención local máxima de 24 horas y botón para borrar el recorrido del dispositivo.
 - Cero servicios externos: la aplicación no transmite los datos capturados.
@@ -22,8 +23,8 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
    - **Cumple = 1**
    - **No cumple = 0** y requiere una acción breve.
    - **No aplica** queda fuera del cálculo.
-3. Revisa el resultado general, el desempeño por bloque y las oportunidades.
-4. Descarga el JSON. Si necesitas un documento formal, conviértelo a PDF con Python.
+3. Revisa primero los puntos a favor y después las correcciones inmediatas.
+4. Guarda el resumen PDF desde la misma pantalla de resultado.
 
 La tasa de éxito se calcula así:
 
@@ -45,15 +46,15 @@ Instala las dependencias una vez:
 python -m pip install -r requirements.txt
 ```
 
-Después de descargar el resultado desde la web:
+Para validar el motor y generar el reporte ejecutivo de ejemplo:
 
 ```bash
 python scripts/generate_store_report.py \
-  --input exports/resultado_tienda.json \
-  --output exports/Reporte_Fall26.pdf
+  --input sample/ejemplo_resultado.json \
+  --output output/pdf/Reporte_Ejemplo_Fall26.pdf
 ```
 
-El reporte incluye identidad de tienda, tasa de éxito, conteos, calificación por bloque y los puntos **No cumple** con su comentario.
+El reporte reconoce los puntos **Cumple**, muestra la tasa de éxito por bloque y propone una corrección concreta para cada **No cumple**.
 
 ## Referencias visuales
 

@@ -1,4 +1,4 @@
-# 10 mejoras implementadas
+# Mejoras implementadas
 
 1. Recorrido guiado de una pregunta por pantalla para evitar saturación.
 2. Tres decisiones consistentes: Cumple, No cumple y No aplica.
@@ -8,7 +8,7 @@
 6. Referencias WebP optimizadas, tomadas únicamente de materiales oficiales.
 7. Avisos de privacidad persistentes y cero dependencias web externas.
 8. Modo offline mediante PWA para conservar continuidad en tienda.
-9. Exportación JSON y generación Python de un PDF ejecutivo por tienda.
+9. Resumen imprimible y generación Python de un PDF ejecutivo por tienda.
 10. Workflow de calidad con validación de contenido, recursos, cálculo y sintaxis.
 
 ## Rediseño cálido y privacidad
@@ -18,4 +18,6 @@
 13. Mapa navegable de nueve secciones con estado activo y completado.
 14. Aviso inicial de responsabilidad y consulta permanente desde encabezado y pie.
 15. Retención local de 24 horas, reaceptación por sesión y borrado manual.
-16. Registro de aceptación dentro del JSON y del reporte PDF generado con Python.
+16. Registro de aceptación en el avance local y en el reporte PDF generado con Python.
+17. Corrección inmediata desde JSON para cada No cumple, lista para usar o ajustar.
+18. Reconocimiento cálido de puntos a favor en la web y en el reporte ejecutivo.

@@ -23,12 +23,13 @@
       "eyebrow": "JUNTÉMONOS MÁS",
       "heroTitle": "Fall ya está aquí.",
       "heroIntro": "Hagamos que esta temporada se viva en cada tienda.",
-      "heroPromise": "Un recorrido cálido, rápido y objetivo para reconocer lo que funciona y corregir lo necesario."
+      "heroPromise": "Un recorrido cercano para reconocer al equipo, corregir en el momento y vivir Fall en cada detalle."
     },
     "navigation": {
       "showSectionRail": true,
       "allowSectionJump": true,
       "keyboardShortcuts": true,
+      "showImmediateGuidance": true,
       "scrollBehavior": "smooth"
     }
   },
@@ -50,7 +51,7 @@
       "Contraseñas, accesos o información financiera",
       "Capturas o resultados en canales no autorizados"
     ],
-    "exportWarning": "El JSON y el PDF deben permanecer únicamente en canales internos autorizados.",
+    "exportWarning": "El resumen PDF debe permanecer únicamente en canales internos autorizados.",
     "publicRepositoryWarning": "Este material no debe publicarse en repositorios o sitios de acceso abierto."
   }
 }

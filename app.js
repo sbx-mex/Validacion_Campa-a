@@ -49,10 +49,11 @@ function bindDom() {
     "privacyConfirm", "resumeButton", "startError", "headerProgress", "headerStep", "headerScore",
     "backToStart", "sectionLabel", "questionCounter", "liveScore", "progressBar", "questionNumber",
     "questionTitle", "appliesBadge", "referenceButton", "referenceImage", "noImageCue", "questionText",
-    "criterionText", "statusOptions", "commentWrap", "commentHint", "commentInput", "commentCount",
+    "criterionText", "statusOptions", "responseGuidance", "responseGuidanceIcon", "responseGuidanceTitle",
+    "responseGuidanceText", "applyCorrection", "commentWrap", "commentHint", "commentInput", "commentCount",
     "previousButton", "nextButton", "questionError", "summaryStore", "summaryValidator", "scoreRing",
     "summaryScore", "passCount", "failCount", "naCount", "answeredCount", "resultBadge", "resultMessage",
-    "sectionResults", "opportunityCount", "opportunitiesList", "downloadJson", "printReport", "restartButton",
+    "sectionResults", "strengthCount", "strengthsList", "opportunityCount", "opportunitiesList", "printReport", "restartButton",
     "imageDialog", "closeImageDialog", "dialogImage", "dialogTitle", "dialogDate", "toast",
     "privacyClassification", "privacyNotice", "headerEyebrow", "startTitle", "heroImage", "heroIntro", "heroPromise",
     "retentionHours", "prohibitedDataList", "responsibilityTitle", "responsibilityText", "clearLocalData", "sectionRail",
@@ -84,6 +85,7 @@ function validateContent() {
   questions.forEach((item, index) => {
     if (item.id !== `q${String(index + 1).padStart(2, "0")}`) throw new Error(`Orden inválido en ${item.id}.`);
     if (!item.question || !item.title || !item.applies) throw new Error(`Control incompleto: ${item.id}.`);
+    if (!correctionActionFor(item)) throw new Error(`Falta corrección inmediata: ${item.id}.`);
   });
 }
 
@@ -114,7 +116,7 @@ function bindEvents() {
   dom.imageDialog.addEventListener("click", (event) => {
     if (event.target === dom.imageDialog) dom.imageDialog.close();
   });
-  dom.downloadJson.addEventListener("click", downloadResultJson);
+  dom.applyCorrection.addEventListener("click", applySuggestedCorrection);
   dom.printReport.addEventListener("click", () => window.print());
   dom.restartButton.addEventListener("click", restartValidation);
   dom.clearLocalData.addEventListener("click", clearSavedValidation);
@@ -239,8 +241,9 @@ function renderQuestion() {
   });
   dom.commentInput.value = answer.comment || "";
   updateCommentUi(answer.status);
+  renderResponseGuidance(answer.status);
   dom.previousButton.disabled = state.currentIndex === 0;
-  dom.nextButton.textContent = number === questions.length ? "Ver resultado →" : "Siguiente →";
+  dom.nextButton.textContent = number === questions.length ? "Terminar recorrido →" : "Guardar y continuar →";
   dom.questionError.textContent = "";
   updateSectionRail();
   updateLiveMetrics();
@@ -259,9 +262,11 @@ function handleChoice(event) {
   };
   updateCommentUi(button.dataset.status);
   renderChoiceState(button.dataset.status);
+  renderResponseGuidance(button.dataset.status);
   updateLiveMetrics();
   saveState();
-  if (button.dataset.status === STATUS.FAIL) dom.commentInput.focus();
+  if (button.dataset.status === STATUS.FAIL) dom.applyCorrection.focus();
+  else dom.nextButton.focus();
 }
 
 function renderChoiceState(status) {
@@ -291,6 +296,47 @@ function updateCommentUi(status) {
   dom.commentHint.textContent = required ? "requerido para No cumple" : "opcional";
   dom.commentInput.placeholder = required ? "¿Qué debe corregirse?" : "Comentario breve (opcional)";
   dom.commentCount.textContent = `${dom.commentInput.value.length}/${settings.maxCommentLength}`;
+}
+
+function correctionActionFor(item) {
+  return checklist?.guidance?.correctiveActions?.[item.id] || item.criterion || "Corrige el estándar y vuelve a validar.";
+}
+
+function renderResponseGuidance(status) {
+  const item = questions[state.currentIndex];
+  const guidance = checklist.guidance || {};
+  if (!settings.experience?.navigation?.showImmediateGuidance) {
+    dom.responseGuidance.hidden = true;
+    return;
+  }
+  dom.responseGuidance.hidden = !status;
+  dom.responseGuidance.className = `response-guidance${status ? ` is-${status}` : ""}`;
+  dom.applyCorrection.hidden = status !== STATUS.FAIL;
+  if (!status) return;
+  if (status === STATUS.PASS) {
+    dom.responseGuidanceIcon.textContent = "✓";
+    dom.responseGuidanceTitle.textContent = guidance.successTitle || "¡Bien hecho!";
+    dom.responseGuidanceText.textContent = guidance.successText || "El estándar está listo. Reconoce al equipo.";
+  } else if (status === STATUS.FAIL) {
+    dom.responseGuidanceIcon.textContent = "↻";
+    dom.responseGuidanceTitle.textContent = guidance.failTitle || "Corrección inmediata sugerida";
+    dom.responseGuidanceText.textContent = correctionActionFor(item);
+  } else {
+    dom.responseGuidanceIcon.textContent = "•";
+    dom.responseGuidanceTitle.textContent = guidance.naTitle || "No aplica en esta tienda";
+    dom.responseGuidanceText.textContent = guidance.naText || "Este punto queda fuera de la calificación.";
+  }
+}
+
+function applySuggestedCorrection() {
+  const item = questions[state.currentIndex];
+  const answer = state.answers[item.id];
+  if (answer?.status !== STATUS.FAIL) return;
+  const suggestion = correctionActionFor(item).slice(0, settings.maxCommentLength);
+  dom.commentInput.value = suggestion;
+  handleComment();
+  dom.nextButton.focus();
+  showToast("Acción sugerida agregada. Puedes ajustarla antes de continuar.");
 }
 
 function validateCurrentQuestion(showError = true) {
@@ -373,6 +419,7 @@ function showSummary() {
   dom.resultBadge.textContent = reading.label;
   dom.resultMessage.textContent = reading.message;
   renderSections();
+  renderStrengths();
   renderOpportunities();
   dom.headerStep.textContent = "36 / 36";
   dom.headerScore.textContent = stats.score === null ? "—" : `${stats.score}%`;
@@ -380,9 +427,9 @@ function showSummary() {
 
 function classifyResult(score) {
   if (score === null) return { label: "SIN PUNTAJE", message: "No existen controles aplicables para calcular la tasa de éxito." };
-  if (score >= 90) return { label: "ARRANQUE CONSISTENTE", message: "La ejecución es sólida. Corrige los puntos aislados y reconoce al equipo por los estándares sostenidos." };
-  if (score >= 75) return { label: "EN SEGUIMIENTO", message: "La campaña está encaminada. Prioriza los No cumple y vuelve a validar antes del cierre del turno." };
-  return { label: "PRIORIDAD INMEDIATA", message: "Existen riesgos visibles para el arranque. Ejecuta un plan correctivo inmediato y confirma nuevamente los puntos críticos." };
+  if (score >= 90) return { label: "ARRANQUE CONSISTENTE", message: "¡Gran trabajo! Reconoce al equipo por lo que ya está sólido y cierra las oportunidades puntuales." };
+  if (score >= 75) return { label: "VAMOS BIEN", message: "La campaña está encaminada. Celebra los puntos a favor y completa las correcciones antes del siguiente turno." };
+  return { label: "ENFOQUE INMEDIATO", message: "Hay una base para avanzar. Atiende primero las correcciones sugeridas y vuelve a validar los puntos prioritarios." };
 }
 
 function renderSections() {
@@ -420,77 +467,34 @@ function renderOpportunities() {
     row.className = "opportunity";
     row.innerHTML = `
       <b>×</b>
-      <div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(answer.comment || item.criterion)}</p></div>
+      <div>
+        <strong>${escapeHtml(item.title)}</strong>
+        <p><span>Corrige ahora:</span> ${escapeHtml(correctionActionFor(item))}</p>
+        <small>Seguimiento: ${escapeHtml(answer.comment)}</small>
+      </div>
       <span>${escapeHtml(item.applies)}</span>`;
     dom.opportunitiesList.append(row);
   });
 }
 
-function buildExportPayload() {
-  const stats = calculateStats();
-  const sectionResults = checklist.sections.map((section) => {
-    const items = questions.filter((item) => item.sectionId === section.id);
-    const sectionStats = calculateStats(items);
-    return {
-      id: section.id,
-      title: section.title,
-      score: sectionStats.score,
-      counts: {
-        cumple: sectionStats.pass,
-        no_cumple: sectionStats.fail,
-        na: sectionStats.na,
-        respondidas: sectionStats.answered,
-      },
-    };
+function renderStrengths() {
+  const strengths = questions.filter((item) => state.answers[item.id]?.status === STATUS.PASS);
+  dom.strengthCount.textContent = strengths.length;
+  dom.strengthsList.replaceChildren();
+  checklist.sections.forEach((section) => {
+    const ready = strengths.filter((item) => item.sectionId === section.id);
+    if (!ready.length) return;
+    const row = document.createElement("article");
+    row.className = "strength";
+    row.innerHTML = `<b>✓</b><div><strong>${escapeHtml(section.title)}</strong><p>${ready.length} ${ready.length === 1 ? "estándar listo" : "estándares listos"}</p></div>`;
+    dom.strengthsList.append(row);
   });
-  return {
-    schemaVersion: 1,
-    project: settings.title,
-    campaign: checklist.campaign,
-    privateNotice: checklist.privateNotice,
-    responsibility: {
-      accepted: Boolean(state.privacyAcceptedAt),
-      acceptedAt: state.privacyAcceptedAt,
-      storageMode: settings.privacy.storageMode,
-      retentionHours: settings.privacy.retentionHours,
-      exportWarning: settings.privacy.exportWarning,
-    },
-    store: state.store,
-    validator: state.validator,
-    startedAt: state.startedAt,
-    completedAt: state.completedAt || new Date().toISOString(),
-    scoreRule: checklist.scoreRule,
-    result: { ...stats, classification: classifyResult(stats.score).label },
-    sections: sectionResults,
-    answers: questions.map((item) => {
-      const answer = state.answers[item.id] || {};
-      return {
-        id: item.id,
-        sectionId: item.sectionId,
-        sectionTitle: item.sectionTitle,
-        title: item.title,
-        question: item.question,
-        applies: item.applies,
-        status: answer.status || null,
-        value: answer.status === STATUS.PASS ? 1 : answer.status === STATUS.FAIL ? 0 : null,
-        comment: answer.comment || "",
-      };
-    }),
-  };
-}
-
-function downloadResultJson() {
-  const payload = buildExportPayload();
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `Validacion_Fall26_${safeFilename(state.store)}_${localDateStamp()}.json`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-  showToast("JSON descargado. Resguárdalo sólo en canales internos autorizados.");
+  if (!strengths.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-opportunities";
+    empty.textContent = "Al corregir y volver a validar, aquí aparecerán los puntos a reconocer.";
+    dom.strengthsList.append(empty);
+  }
 }
 
 function restartValidation() {
@@ -672,15 +676,6 @@ function closePrivacyDialog() {
 function scrollTop() {
   const behavior = settings.experience?.navigation?.scrollBehavior === "auto" ? "auto" : "smooth";
   window.scrollTo({ top: 0, behavior });
-}
-
-function safeFilename(value) {
-  return String(value || "Tienda").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 50) || "Tienda";
-}
-
-function localDateStamp() {
-  const date = new Date();
-  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function escapeHtml(value) {

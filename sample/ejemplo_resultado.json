@@ -8,7 +8,7 @@
     "acceptedAt": "2026-09-01T09:00:00-06:00",
     "storageMode": "local_only",
     "retentionHours": 24,
-    "exportWarning": "El JSON y el PDF deben permanecer únicamente en canales internos autorizados."
+    "exportWarning": "El resumen PDF debe permanecer únicamente en canales internos autorizados."
   },
   "store": "Tienda Ejemplo 001",
   "validator": "Responsable de ejemplo",

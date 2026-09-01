@@ -8,7 +8,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from scoring import build_section_summary, calculate_counts, calculate_score, classify_score, validate_answers  # noqa: E402
+from scoring import (  # noqa: E402
+    build_execution_insights,
+    build_section_summary,
+    calculate_counts,
+    calculate_score,
+    classify_score,
+    validate_answers,
+)
 
 
 class ScoringTests(unittest.TestCase):
@@ -39,8 +46,24 @@ class ScoringTests(unittest.TestCase):
 
     def test_classification_boundaries(self):
         self.assertEqual(classify_score(90)[0], "Arranque consistente")
-        self.assertEqual(classify_score(75)[0], "Requiere seguimiento")
-        self.assertEqual(classify_score(74.9)[0], "Atención prioritaria")
+        self.assertEqual(classify_score(75)[0], "Vamos bien")
+        self.assertEqual(classify_score(74.9)[0], "Enfoque inmediato")
+
+    def test_immediate_action_is_added_to_failures(self):
+        insights = build_execution_insights(
+            [
+                {"id": "q01", "status": "cumple"},
+                {"id": "q02", "status": "no_cumple", "comment": "Asignado"},
+                {"id": "q03", "status": "na"},
+            ],
+            {"q02": "Coloca el material correcto y vuelve a validar."},
+        )
+        self.assertEqual(len(insights["strengths"]), 1)
+        self.assertEqual(insights["opportunities"][0]["suggestedAction"], "Coloca el material correcto y vuelve a validar.")
+
+    def test_value_must_match_status(self):
+        with self.assertRaisesRegex(ValueError, "valor incompatible"):
+            validate_answers([{"id": "q01", "status": "cumple", "value": 0}])
 
 
 if __name__ == "__main__":

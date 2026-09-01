@@ -35,4 +35,13 @@ const stats = vm.runInContext("calculateStats()", context);
 assert.equal(stats.score, 66.7, "No aplica debe excluirse del cálculo.");
 assert.equal(stats.na, 1);
 
-console.log("Lógica web válida: retención de 24 h y puntuación sin N/A.");
+vm.runInContext(`
+  checklist = {guidance:{correctiveActions:{q02:"Coloca el material vigente y vuelve a validar."}}};
+`, context);
+assert.equal(
+  vm.runInContext('correctionActionFor({id:"q02",criterion:"Criterio"})', context),
+  "Coloca el material vigente y vuelve a validar.",
+  "Cada No cumple debe recuperar su corrección inmediata desde JSON.",
+);
+
+console.log("Lógica web válida: retención de 24 h, puntuación sin N/A y corrección inmediata.");

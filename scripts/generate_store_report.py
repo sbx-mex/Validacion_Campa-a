@@ -20,8 +20,6 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
-    KeepTogether,
-    PageBreak,
     PageTemplate,
     Paragraph,
     Spacer,
@@ -29,7 +27,14 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from scoring import build_section_summary, calculate_counts, calculate_score, classify_score, validate_answers
+from scoring import (
+    build_execution_insights,
+    build_section_summary,
+    calculate_counts,
+    calculate_score,
+    classify_score,
+    validate_answers,
+)
 
 
 GREEN = colors.HexColor("#006241")
@@ -43,7 +48,8 @@ LIGHT = colors.HexColor("#E9F2EE")
 PLUM = colors.HexColor("#2C2430")
 REGULAR = "DejaVu"
 BOLD = "DejaVu-Bold"
-FONT_DIR = Path(__file__).resolve().parents[1] / "assets" / "fonts"
+ROOT = Path(__file__).resolve().parents[1]
+FONT_DIR = ROOT / "assets" / "fonts"
 
 pdfmetrics.registerFont(TTFont(REGULAR, str(FONT_DIR / "DejaVuSans.ttf")))
 pdfmetrics.registerFont(TTFont(BOLD, str(FONT_DIR / "DejaVuSans-Bold.ttf")))
@@ -58,7 +64,7 @@ def parse_args() -> argparse.Namespace:
 
 def safe_text(value: Any, limit: int = 180) -> str:
     text = " ".join(str(value or "").split())[:limit]
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return text.replace("\u2011", "-").replace("\u2013", "-").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def load_payload(path: Path) -> dict[str, Any]:
@@ -80,6 +86,15 @@ def parse_date(value: Any) -> str:
         return safe_text(value, 40)
 
 
+def load_corrective_actions() -> dict[str, str]:
+    with (ROOT / "data" / "fall26_checklist.json").open("r", encoding="utf-8") as stream:
+        checklist = json.load(stream)
+    actions = checklist.get("guidance", {}).get("correctiveActions", {})
+    if not isinstance(actions, dict):
+        raise ValueError("El catálogo no contiene correcciones inmediatas válidas.")
+    return {str(key): str(value) for key, value in actions.items()}
+
+
 def header_footer(canvas, doc) -> None:
     canvas.saveState()
     width, height = letter
@@ -91,12 +106,17 @@ def header_footer(canvas, doc) -> None:
     canvas.setFont(BOLD, 8)
     canvas.drawString(18 * mm, height - 10.7 * mm, "VALIDACIÓN CAMPAÑA · FALL 26")
     canvas.setFont(REGULAR, 7)
-    canvas.drawRightString(width - 18 * mm, height - 10.7 * mm, "USO INTERNO · INFORMACIÓN PRIVADA")
+    canvas.drawRightString(width - 18 * mm, height - 10.7 * mm, "JUNTÉMONOS MÁS · USO INTERNO")
+    canvas.setFillColor(colors.HexColor("#F79435"))
+    canvas.circle(width - 14 * mm, height - 8.5 * mm, 1.4 * mm, fill=1, stroke=0)
+    canvas.setStrokeColor(colors.HexColor("#F7AA63"))
+    canvas.setLineWidth(1.1)
+    canvas.arc(width - 18 * mm, height - 13 * mm, width - 12 * mm, height - 7 * mm, 10, 115)
     canvas.setStrokeColor(colors.HexColor("#D8E3DE"))
     canvas.line(18 * mm, 14 * mm, width - 18 * mm, 14 * mm)
     canvas.setFillColor(MUTED)
     canvas.setFont(REGULAR, 7)
-    canvas.drawString(18 * mm, 9 * mm, "JUNTÉMONOS MÁS · Corrige cada NO CUMPLE con responsable y fecha.")
+    canvas.drawString(18 * mm, 9 * mm, "Gracias por validar · Cada corrección fortalece la experiencia Fall.")
     canvas.drawRightString(width - 18 * mm, 9 * mm, f"Página {doc.page}")
     canvas.restoreState()
 
@@ -113,6 +133,8 @@ def build_styles() -> dict[str, ParagraphStyle]:
         "kpi": ParagraphStyle("Kpi", parent=base["Normal"], fontName=BOLD, fontSize=20, leading=22, textColor=DARK, alignment=TA_CENTER),
         "kpi_label": ParagraphStyle("KpiLabel", parent=base["Normal"], fontName=BOLD, fontSize=7, leading=8, textColor=MUTED, alignment=TA_CENTER),
         "white": ParagraphStyle("White", parent=base["Normal"], fontName=BOLD, fontSize=10, leading=12, textColor=colors.white, alignment=TA_CENTER),
+        "eyebrow": ParagraphStyle("Eyebrow", parent=base["Normal"], fontName=BOLD, fontSize=7.5, leading=9, textColor=ORANGE, spaceAfter=3),
+        "warm": ParagraphStyle("Warm", parent=base["BodyText"], fontName=REGULAR, fontSize=8, leading=10.5, textColor=colors.HexColor("#654836")),
     }
 
 
@@ -134,7 +156,9 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
     score = calculate_score(counts)
     label, message = classify_score(score)
     sections = payload.get("sections") or payload.get("summary", {}).get("sections") or build_section_summary(answers)
-    opportunities = [answer for answer in answers if answer.get("status") == "no_cumple"]
+    insights = build_execution_insights(answers, load_corrective_actions())
+    strengths = insights["strengths"]
+    opportunities = insights["opportunities"]
     styles = build_styles()
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -147,8 +171,9 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
     doc.addPageTemplates([PageTemplate(id="report", frames=[frame], onPage=header_footer)])
 
     story = [
-        Paragraph("Resultado de tienda", styles["title"]),
-        Paragraph("Resumen ejecutivo del recorrido operativo Fall 26.", styles["subtitle"]),
+        Paragraph("RECORRIDO COMPLETADO", styles["eyebrow"]),
+        Paragraph("Así está tu tienda", styles["title"]),
+        Paragraph("Gracias por hacer una pausa para validar. Reconoce lo que ya funciona y corrige lo necesario con una acción clara.", styles["subtitle"]),
     ]
     responsibility = payload.get("responsibility") or {}
     acceptance = "Aceptación registrada" if responsibility.get("accepted") else "Aceptación no incluida en el archivo"
@@ -156,7 +181,7 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
     retention = safe_text(responsibility.get("retentionHours") or 24, 4)
     privacy_line = (
         f"<b>RESPONSABILIDAD DE USO</b> · {acceptance}: {accepted_at} · "
-        f"Guardado local hasta {retention} horas · Resguarda JSON y PDF sólo en canales internos autorizados."
+        f"Guardado local hasta {retention} horas · Resguarda el reporte sólo en canales internos autorizados."
     )
     identity = Table([
         [Paragraph("<b>Tienda</b><br/>" + safe_text(payload.get("store"), 80), styles["body"]),
@@ -193,7 +218,24 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
         ("TOPPADDING", (0, 0), (-1, -1), 8), ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
     ]))
-    story += [result, Spacer(1, 5 * mm), Paragraph("Resultado por bloque", styles["section"])]
+    strength_names = " · ".join(safe_text(answer.get("title"), 45) for answer in strengths[:6])
+    if len(strengths) > 6:
+        strength_names += f" · y {len(strengths) - 6} más"
+    if not strength_names:
+        strength_names = "Los puntos corregidos aparecerán aquí en la siguiente validación."
+    recognition = Table([[
+        Paragraph(f"{len(strengths)}<br/><font size='7'>PUNTOS A FAVOR</font>", styles["white"]),
+        Paragraph(f"<b>Reconozcamos al equipo</b><br/>{strength_names}", styles["warm"]),
+    ]], colWidths=[39 * mm, doc.width - 39 * mm])
+    recognition.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), GREEN),
+        ("BACKGROUND", (1, 0), (1, 0), colors.HexColor("#EEF8F3")),
+        ("BOX", (0, 0), (-1, -1), .7, colors.HexColor("#8DB9A6")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+    story += [result, Spacer(1, 3 * mm), recognition, Spacer(1, 5 * mm), Paragraph("Resultado por bloque", styles["section"])]
 
     section_rows = [["Bloque", "Cumple", "No cumple", "N/A", "Resultado"]]
     for section in sections:
@@ -217,18 +259,20 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ("TOPPADDING", (0, 0), (-1, -1), 3.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
     ]))
-    story += [section_table, Spacer(1, 6 * mm), Paragraph(f"Oportunidades ({len(opportunities)})", styles["section"])]
+    story += [section_table, Spacer(1, 6 * mm), Paragraph(f"Correcciones inmediatas ({len(opportunities)})", styles["section"])]
 
     if not opportunities:
-        story.append(Paragraph("No se registraron puntos NO CUMPLE. Mantén el estándar y comparte el resultado con el equipo.", styles["body"]))
+        story.append(Paragraph("No se registraron puntos NO CUMPLE. Celebra el resultado, mantén el estándar y reconoce al equipo.", styles["body"]))
     else:
-        opportunity_rows = [["#", "Punto", "Aplica", "Comentario / acción"]]
+        opportunity_rows = [["#", "Punto", "Corrección sugerida", "Compromiso registrado"]]
         for number, answer in enumerate(opportunities, start=1):
             opportunity_rows.append([
-                str(number), Paragraph(f"<b>{safe_text(answer.get('title'), 70)}</b><br/><font color='#5F6F69'>{safe_text(answer.get('question'), 150)}</font>", styles["small"]),
-                safe_text(answer.get("applies"), 25), Paragraph(safe_text(answer.get("comment"), 120), styles["small"]),
+                str(number),
+                Paragraph(f"<b>{safe_text(answer.get('title'), 70)}</b><br/><font color='#D94F1D'>{safe_text(answer.get('applies'), 25)}</font>", styles["small"]),
+                Paragraph(safe_text(answer.get("suggestedAction"), 190), styles["small"]),
+                Paragraph(safe_text(answer.get("comment"), 120), styles["small"]),
             ])
-        opportunities_table = Table(opportunity_rows, colWidths=[10 * mm, 82 * mm, 25 * mm, 60 * mm], repeatRows=1)
+        opportunities_table = Table(opportunity_rows, colWidths=[9 * mm, 45 * mm, 75 * mm, 48 * mm], repeatRows=1)
         opportunities_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), ORANGE), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTNAME", (0, 0), (-1, 0), BOLD), ("FONTSIZE", (0, 0), (-1, -1), 7.3),
@@ -240,12 +284,6 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ]))
         story.append(opportunities_table)
 
-    story += [Spacer(1, 2 * mm), KeepTogether([
-        Paragraph("Regla de evaluación", styles["section"]),
-        Paragraph("Cumple = 1 · No cumple = 0 · No aplica queda fuera del cálculo. Tasa de éxito = Cumple / (Cumple + No cumple) x 100.", styles["body"]),
-        Spacer(1, 2 * mm),
-        Paragraph("Este reporte contiene información privada de la compañía. Uso exclusivo para validación operativa; está prohibida su divulgación.", styles["small"]),
-    ])]
     doc.build(story)
 
 
