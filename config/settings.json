@@ -30,6 +30,8 @@
       "allowSectionJump": true,
       "keyboardShortcuts": true,
       "showImmediateGuidance": true,
+      "autoAdvanceStatuses": ["cumple", "na"],
+      "autoAdvanceDelayMs": 650,
       "scrollBehavior": "smooth"
     }
   },
@@ -40,9 +42,11 @@
   },
   "privacy": {
     "classification": "USO INTERNO",
-    "shortNotice": "Información privada de la compañía · Prohibida su divulgación",
-    "responsibilityTitle": "Responsabilidad de uso",
-    "responsibilityText": "Confirmo que utilizaré esta herramienta únicamente para la operación autorizada, protegeré el material y resguardaré los resultados.",
+    "shortNotice": "Revisión de campaña · No divulgar",
+    "responsibilityTitle": "Uso responsable",
+    "responsibilityText": "Confirmo que usaré y resguardaré esta información únicamente para la revisión autorizada de campaña.",
+    "ownershipNotice": "La información publicada es propiedad de la marca y está prohibida su divulgación.",
+    "copyright": "Copyright 2026 © Starbucks México",
     "storageMode": "local_only",
     "retentionHours": 24,
     "requireAcceptanceEverySession": true,
@@ -51,7 +55,7 @@
       "Contraseñas, accesos o información financiera",
       "Capturas o resultados en canales no autorizados"
     ],
-    "exportWarning": "El resumen PDF debe permanecer únicamente en canales internos autorizados.",
+    "exportWarning": "Uso exclusivo para revisión de campaña. Resguarda el reporte en canales internos autorizados.",
     "publicRepositoryWarning": "Este material no debe publicarse en repositorios o sitios de acceso abierto."
   }
 }

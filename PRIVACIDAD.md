@@ -1,6 +1,9 @@
 # Privacidad y uso autorizado
 
-Este proyecto y sus referencias visuales contienen información privada de la compañía. Su uso está limitado a la validación operativa autorizada de la campaña Fall 26.
+Este proyecto y sus referencias visuales son de uso interno y están limitados a la revisión autorizada de la campaña Fall 26.
+
+> La información publicada es propiedad de la marca y está prohibida su divulgación.  
+> Copyright 2026 © Starbucks México
 
 - No publiques el repositorio ni habilites GitHub Pages sin autorización corporativa.
 - No agregues nombres de clientes, teléfonos, correos, fotografías de personas ni otros datos personales.
@@ -10,7 +13,7 @@ Este proyecto y sus referencias visuales contienen información privada de la co
 - El reporte PDF debe almacenarse únicamente en ubicaciones internas autorizadas.
 - Elimina los resultados locales cuando concluya el proceso de seguimiento.
 
-La leyenda de uso interno aparece en la interfaz, las referencias y el reporte PDF.
+La leyenda de uso interno aparece en la interfaz y en el reporte PDF.
 
 ## Advertencia del repositorio
 

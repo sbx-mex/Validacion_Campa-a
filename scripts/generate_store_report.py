@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convierte el JSON exportado por la web en un reporte PDF ejecutivo."""
+"""Genera el reporte PDF ejecutivo de una validación Fall 26."""
 
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ pdfmetrics.registerFont(TTFont(BOLD, str(FONT_DIR / "DejaVuSans-Bold.ttf")))
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True, help="JSON exportado por Validación Campaña.")
+    parser.add_argument("--input", type=Path, required=True, help="Archivo de resultados de Validación Campaña.")
     parser.add_argument("--output", type=Path, required=True, help="Ruta del PDF de salida.")
     return parser.parse_args()
 
@@ -113,11 +113,12 @@ def header_footer(canvas, doc) -> None:
     canvas.setLineWidth(1.1)
     canvas.arc(width - 18 * mm, height - 13 * mm, width - 12 * mm, height - 7 * mm, 10, 115)
     canvas.setStrokeColor(colors.HexColor("#D8E3DE"))
-    canvas.line(18 * mm, 14 * mm, width - 18 * mm, 14 * mm)
+    canvas.line(18 * mm, 15.5 * mm, width - 18 * mm, 15.5 * mm)
     canvas.setFillColor(MUTED)
-    canvas.setFont(REGULAR, 7)
-    canvas.drawString(18 * mm, 9 * mm, "Gracias por validar · Cada corrección fortalece la experiencia Fall.")
-    canvas.drawRightString(width - 18 * mm, 9 * mm, f"Página {doc.page}")
+    canvas.setFont(REGULAR, 5.8)
+    canvas.drawString(18 * mm, 10.5 * mm, "La información publicada es propiedad de la marca y está prohibida su divulgación.")
+    canvas.drawString(18 * mm, 7.2 * mm, "Copyright 2026 © Starbucks México")
+    canvas.drawRightString(width - 18 * mm, 7.2 * mm, f"JUNTÉMONOS MÁS · Página {doc.page}")
     canvas.restoreState()
 
 
@@ -164,7 +165,7 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     doc = BaseDocTemplate(
         str(output_path), pagesize=letter, leftMargin=18 * mm, rightMargin=18 * mm,
-        topMargin=23 * mm, bottomMargin=16 * mm, title="Validación Campaña Fall 26",
+        topMargin=23 * mm, bottomMargin=19 * mm, title="Validación Campaña Fall 26",
         author="Validación Campaña",
     )
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="main")
@@ -172,16 +173,15 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
 
     story = [
         Paragraph("RECORRIDO COMPLETADO", styles["eyebrow"]),
-        Paragraph("Así está tu tienda", styles["title"]),
-        Paragraph("Gracias por hacer una pausa para validar. Reconoce lo que ya funciona y corrige lo necesario con una acción clara.", styles["subtitle"]),
+        Paragraph("Resultado Fall 26", styles["title"]),
+        Paragraph("Gracias por validar. Celebremos lo que está listo y resolvamos juntos cada oportunidad.", styles["subtitle"]),
     ]
     responsibility = payload.get("responsibility") or {}
     acceptance = "Aceptación registrada" if responsibility.get("accepted") else "Aceptación no incluida en el archivo"
-    accepted_at = parse_date(responsibility.get("acceptedAt")) if responsibility.get("acceptedAt") else "Sin fecha"
     retention = safe_text(responsibility.get("retentionHours") or 24, 4)
     privacy_line = (
-        f"<b>RESPONSABILIDAD DE USO</b> · {acceptance}: {accepted_at} · "
-        f"Guardado local hasta {retention} horas · Resguarda el reporte sólo en canales internos autorizados."
+        f"<b>USO RESPONSABLE</b> · {acceptance} · Revisión de campaña · "
+        f"Guardado local hasta {retention} horas · No divulgar."
     )
     identity = Table([
         [Paragraph("<b>Tienda</b><br/>" + safe_text(payload.get("store"), 80), styles["body"]),
@@ -259,12 +259,12 @@ def build_report(payload: dict[str, Any], output_path: Path) -> None:
         ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ("TOPPADDING", (0, 0), (-1, -1), 3.5), ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
     ]))
-    story += [section_table, Spacer(1, 6 * mm), Paragraph(f"Correcciones inmediatas ({len(opportunities)})", styles["section"])]
+    story += [section_table, Spacer(1, 6 * mm), Paragraph(f"Acciones inmediatas ({len(opportunities)})", styles["section"])]
 
     if not opportunities:
         story.append(Paragraph("No se registraron puntos NO CUMPLE. Celebra el resultado, mantén el estándar y reconoce al equipo.", styles["body"]))
     else:
-        opportunity_rows = [["#", "Punto", "Corrección sugerida", "Compromiso registrado"]]
+        opportunity_rows = [["#", "Punto", "Corrige ahora", "Seguimiento"]]
         for number, answer in enumerate(opportunities, start=1):
             opportunity_rows.append([
                 str(number),

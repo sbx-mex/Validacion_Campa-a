@@ -21,3 +21,8 @@
 16. Registro de aceptación en el avance local y en el reporte PDF generado con Python.
 17. Corrección inmediata desde JSON para cada No cumple, lista para usar o ajustar.
 18. Reconocimiento cálido de puntos a favor en la web y en el reporte ejecutivo.
+19. Avance automático seguro para Cumple y No aplica, conservando regreso y navegación por bloque.
+20. Pausa propositiva en No cumple con acción específica por cada pregunta.
+21. Aviso de privacidad resumido, confirmable y visible en web y PDF.
+22. Dieciséis referencias sustituidas y optimizadas con Python en dos lotes y un paquete combinado.
+23. Cuatro nuevos apoyos visuales: Colombia Nariño, Promoplanner/Delivery, Rewards y Café Blonde.

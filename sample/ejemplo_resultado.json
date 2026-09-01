@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "project": "Validación Campaña",
   "campaign": "Fall 26",
-  "privateNotice": "Información privada de la compañía. Uso exclusivo para validación operativa. Prohibida su divulgación.",
+  "privateNotice": "Uso exclusivo para revisión de campaña. La información es propiedad de la marca y está prohibida su divulgación.",
   "responsibility": {
     "accepted": true,
     "acceptedAt": "2026-09-01T09:00:00-06:00",
     "storageMode": "local_only",
     "retentionHours": 24,
-    "exportWarning": "El resumen PDF debe permanecer únicamente en canales internos autorizados."
+    "exportWarning": "Uso exclusivo para revisión de campaña. Resguarda el reporte en canales internos autorizados."
   },
   "store": "Tienda Ejemplo 001",
   "validator": "Responsable de ejemplo",

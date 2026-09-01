@@ -3,14 +3,14 @@
   "campaign": "Fall 26",
   "title": "Validación Campaña",
   "expectedMinutes": "25–30",
-  "privateNotice": "Información privada de la compañía. Uso exclusivo para validación operativa. Prohibida su divulgación.",
+  "privateNotice": "Uso exclusivo para revisión de campaña. La información es propiedad de la marca y está prohibida su divulgación.",
   "scoreRule": "Cumple / (Cumple + No cumple) × 100. No aplica no pondera.",
   "guidance": {
-    "successTitle": "¡Bien hecho!",
-    "successText": "Este estándar está listo para recibir a nuestros clientes. Reconoce al equipo y mantenlo durante el turno.",
-    "naTitle": "No aplica en esta tienda",
-    "naText": "Este punto queda fuera de la calificación. Continúa con el siguiente control.",
-    "failTitle": "Corrección inmediata sugerida",
+    "successTitle": "¡Listo, partner!",
+    "successText": "Este punto está en estándar. Gracias por cuidarlo.",
+    "naTitle": "No aplica. Seguimos.",
+    "naText": "Queda fuera de la calificación y avanzamos.",
+    "failTitle": "Hagámoslo ahora",
     "correctiveActions": {
       "q01": "Retira la tabla anterior y deja en servicio únicamente la nueva tabla con logotipo grabado.",
       "q02": "Coloca el vaso verde México 2026 y regístralo con el mismo código del vaso core.",
@@ -79,14 +79,18 @@
           "title": "Colombia Nariño",
           "question": "¿Se resguardó del 1 al 6 y se ofrece como Café del Día desde el 7 de septiembre?",
           "criterion": "Identificación operativa: COD Colombia N.",
-          "applies": "7 SEP"
+          "applies": "7 SEP",
+          "image": "assets/reference/q03.webp",
+          "imageAlt": "Accionable para resguardo y salida de Colombia Nariño"
         },
         {
           "id": "q04",
           "title": "Promoplanner y Delivery",
           "question": "¿El equipo conoce el acceso Fall y las categorías vigentes de Delivery?",
           "criterion": "Valida acceso y conocimiento; no exhibas contraseñas.",
-          "applies": "1 SEP"
+          "applies": "1 SEP",
+          "image": "assets/reference/q04.webp",
+          "imageAlt": "Mapa de campaña Fall con Promoplanner y Delivery"
         }
       ]
     },
@@ -202,7 +206,9 @@
           "title": "Rewards y cenefas",
           "question": "¿La cenefa instalada corresponde a la promoción y fecha vigentes?",
           "criterion": "Sin promoción activa, utiliza la cenefa genérica.",
-          "applies": "SEGÚN PROMO"
+          "applies": "SEGÚN PROMO",
+          "image": "assets/reference/q15.webp",
+          "imageAlt": "Cenefas y vigencias de promociones Rewards"
         },
         {
           "id": "q16",
@@ -243,7 +249,9 @@
           "title": "Second choice Blonde",
           "question": "¿Café Blonde está disponible como opción Core y sin costo?",
           "criterion": "Mantén pedido y disponibilidad en Mastrena.",
-          "applies": "CORE"
+          "applies": "CORE",
+          "image": "assets/reference/q19.webp",
+          "imageAlt": "Accionable de Café Blonde como second choice Core"
         },
         {
           "id": "q20",

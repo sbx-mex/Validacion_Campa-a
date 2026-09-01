@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "validacion-fall26-v3";
+const CACHE_NAME = "validacion-fall26-v4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -11,8 +11,8 @@ const CORE_ASSETS = [
   "./data/fall26_checklist.json",
   "./assets/icons/icon.svg",
   ...[
-    "q01", "q02", "q05", "q06", "q07", "q09", "q10", "q11", "q12", "q13",
-    "q14", "q16", "q17", "q18", "q21", "q22", "q23", "q24", "q25", "q26",
+    "q01", "q02", "q03", "q04", "q05", "q06", "q07", "q09", "q10", "q11", "q12", "q13",
+    "q14", "q15", "q16", "q17", "q18", "q19", "q21", "q22", "q23", "q24", "q25", "q26",
     "q27", "q28", "q29", "q30", "q31", "q32", "q33", "q34", "q35", "q36",
   ].map((id) => `./assets/reference/${id}.webp`),
 ];

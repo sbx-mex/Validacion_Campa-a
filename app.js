@@ -17,6 +17,7 @@ let checklist;
 let questions = [];
 let state;
 let toastTimer;
+let autoAdvanceTimer;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -56,8 +57,8 @@ function bindDom() {
     "sectionResults", "strengthCount", "strengthsList", "opportunityCount", "opportunitiesList", "printReport", "restartButton",
     "imageDialog", "closeImageDialog", "dialogImage", "dialogTitle", "dialogDate", "toast",
     "privacyClassification", "privacyNotice", "headerEyebrow", "startTitle", "heroImage", "heroIntro", "heroPromise",
-    "retentionHours", "prohibitedDataList", "responsibilityTitle", "responsibilityText", "clearLocalData", "sectionRail",
-    "saveStatus", "keyboardHint", "summaryPrivacyWarning", "openPrivacy", "openPrivacyFooter",
+    "retentionHours", "responsibilityTitle", "responsibilityText", "clearLocalData", "sectionRail",
+    "saveStatus", "summaryPrivacyWarning", "openPrivacy", "openPrivacyFooter",
     "privacyDialog", "closePrivacyDialog", "acknowledgePrivacy",
   ];
   ids.forEach((id) => { dom[id] = document.getElementById(id); });
@@ -202,6 +203,7 @@ function showValidation() {
 }
 
 function showView(view) {
+  cancelAutoAdvance();
   dom.startView.hidden = view !== "start";
   dom.validationView.hidden = view !== "validation";
   dom.summaryView.hidden = view !== "summary";
@@ -253,6 +255,7 @@ function renderQuestion() {
 function handleChoice(event) {
   const button = event.target.closest("[data-status]");
   if (!button) return;
+  cancelAutoAdvance();
   const item = questions[state.currentIndex];
   const previous = state.answers[item.id] || { comment: "" };
   state.answers[item.id] = {
@@ -266,7 +269,31 @@ function handleChoice(event) {
   updateLiveMetrics();
   saveState();
   if (button.dataset.status === STATUS.FAIL) dom.applyCorrection.focus();
-  else dom.nextButton.focus();
+  else scheduleAutoAdvance(item.id, button.dataset.status);
+}
+
+function scheduleAutoAdvance(itemId, status) {
+  const navigation = settings.experience?.navigation || {};
+  const enabled = Array.isArray(navigation.autoAdvanceStatuses)
+    && navigation.autoAdvanceStatuses.includes(status);
+  if (!enabled) {
+    dom.nextButton.focus();
+    return;
+  }
+  const delay = Math.max(350, Math.min(Number(navigation.autoAdvanceDelayMs) || 650, 1500));
+  dom.nextButton.textContent = "Continuando…";
+  autoAdvanceTimer = setTimeout(() => {
+    autoAdvanceTimer = null;
+    const current = questions[state.currentIndex];
+    if (current?.id !== itemId || state.answers[itemId]?.status !== status) return;
+    nextQuestion();
+  }, delay);
+}
+
+function cancelAutoAdvance() {
+  if (!autoAdvanceTimer) return;
+  clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = null;
 }
 
 function renderChoiceState(status) {
@@ -350,6 +377,7 @@ function validateCurrentQuestion(showError = true) {
 }
 
 function previousQuestion() {
+  cancelAutoAdvance();
   if (state.currentIndex === 0) return;
   state.currentIndex -= 1;
   renderQuestion();
@@ -357,6 +385,7 @@ function previousQuestion() {
 }
 
 function nextQuestion() {
+  cancelAutoAdvance();
   if (!validateCurrentQuestion(true)) return;
   if (state.currentIndex === questions.length - 1) {
     const invalid = questions.filter((item) => {
@@ -587,13 +616,6 @@ function applyExperienceSettings() {
   dom.responsibilityText.textContent = privacy.responsibilityText;
   dom.retentionHours.textContent = `${privacy.retentionHours} horas`;
   dom.summaryPrivacyWarning.textContent = privacy.exportWarning;
-  dom.prohibitedDataList.replaceChildren();
-  privacy.prohibitedData.forEach((text) => {
-    const item = document.createElement("li");
-    item.textContent = text;
-    dom.prohibitedDataList.append(item);
-  });
-  dom.keyboardHint.hidden = !settings.experience?.navigation?.keyboardShortcuts;
 }
 
 function renderSectionRail() {
@@ -630,6 +652,7 @@ function updateSectionRail() {
 }
 
 function handleSectionJump(event) {
+  cancelAutoAdvance();
   const button = event.target.closest("[data-section-id]");
   if (!button || !settings.experience?.navigation?.allowSectionJump) return;
   const currentAnswer = state.answers[questions[state.currentIndex].id];

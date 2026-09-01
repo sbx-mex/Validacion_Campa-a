@@ -1,6 +1,6 @@
 # Validación Campaña · Fall 26
 
-Recorrido ejecutivo para revisar una tienda en 25–30 minutos. Presenta una pregunta por pantalla, muestra una referencia oficial sólo cuando ayuda a decidir y genera una tasa de éxito con oportunidades claras.
+Recorrido ejecutivo de una pregunta por pantalla. Muestra una referencia oficial cuando ayuda a decidir y genera una tasa de éxito con acciones claras.
 
 Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 
@@ -10,7 +10,8 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 
 - Estética cálida Starbucks + Peanuts basada en la referencia oficial ya incluida en el proyecto.
 - Portada, mensajes y paleta controlados desde `config/settings.json`.
-- Navegación por nueve bloques, avance local y atajos `1`, `0` y `N`.
+- Navegación por bloques, avance local y regreso al punto anterior.
+- **Cumple** y **No aplica** avanzan automáticamente; **No cumple** se detiene para definir una acción.
 - Corrección inmediata sugerida al seleccionar **No cumple** y reconocimiento al seleccionar **Cumple**.
 - Aviso de responsabilidad obligatorio al iniciar o reanudar.
 - Retención local máxima de 24 horas y botón para borrar el recorrido del dispositivo.
@@ -19,7 +20,7 @@ Consulta el resumen de [10 mejoras implementadas](MEJORAS_IMPLEMENTADAS.md).
 ## Cómo funciona
 
 1. Captura únicamente **Tienda** y **Quién valida**.
-2. Responde los 36 controles; puedes cambiar de bloque desde el navegador superior:
+2. Responde cada control; puedes cambiar de bloque desde el navegador superior:
    - **Cumple = 1**
    - **No cumple = 0** y requiere una acción breve.
    - **No aplica** queda fuera del cálculo.
@@ -58,7 +59,7 @@ El reporte reconoce los puntos **Cumple**, muestra la tasa de éxito por bloque 
 
 ## Referencias visuales
 
-Las 30 referencias WebP incluidas provienen de recortes del consolidado y del comunicado fuente. No se generó ni sustituyó ninguna imagen de validación. Los archivos originales no se incluyen para evitar duplicación de material privado.
+Las 34 referencias WebP incluidas provienen de materiales autorizados. Las 16 referencias sustituidas se normalizan con Python: orientación, escalado controlado, nitidez suave y conversión WebP de alta calidad. Los originales no se incluyen para evitar duplicación de material privado.
 
 Para regenerarlas desde las láminas autorizadas:
 
@@ -67,6 +68,14 @@ python scripts/build_assets.py \
   --fall-dir "sources/Consolidado_Fall_v2ShowCase" \
   --w36-dir "sources/Comunicado de Operaciones W36" \
   --output-dir assets/reference
+```
+
+Para preparar los dos lotes de sustitución y el paquete combinado:
+
+```bash
+python scripts/optimize_validation_images.py \
+  --source Imagenes_Validacion.zip \
+  --package-dir ../paquetes_imagenes
 ```
 
 ## Calidad y seguridad

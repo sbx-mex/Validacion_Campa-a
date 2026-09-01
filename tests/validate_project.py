@@ -47,6 +47,8 @@ def main() -> None:
     require(settings["privacy"]["requireAcceptanceEverySession"] is True, "Debe confirmarse la responsabilidad en cada sesión.")
     require(settings["experience"]["theme"]["heroImage"] == "assets/reference/q07.webp", "La portada debe usar la referencia Peanuts ya autorizada.")
     require(settings["experience"]["navigation"].get("showImmediateGuidance") is True, "La guía inmediata debe permanecer activa.")
+    require(settings["experience"]["navigation"].get("autoAdvanceStatuses") == ["cumple", "na"], "Cumple y No aplica deben avanzar automáticamente.")
+    require(350 <= settings["experience"]["navigation"].get("autoAdvanceDelayMs", 0) <= 1500, "El avance automático debe permitir leer la confirmación.")
 
     corrective_actions = checklist.get("guidance", {}).get("correctiveActions", {})
     require(set(corrective_actions) == {item["id"] for item in items}, "Cada control debe tener una corrección inmediata única.")
@@ -64,11 +66,11 @@ def main() -> None:
                 require(opened.format == "WEBP", f"Formato inválido en {image}.")
                 require(opened.width >= 50 and opened.height >= 100 and opened.width * opened.height >= 10000, f"Referencia demasiado pequeña: {image}.")
             referenced.append(image)
-    require(len(referenced) == 30, "Deben existir exactamente 30 referencias visuales útiles.")
+    require(len(referenced) == 34, "Deben existir exactamente 34 referencias visuales útiles.")
 
     required_files = [
         "index.html", "styles.css", "app.js", "service-worker.js", "manifest.webmanifest",
-        "assets/icons/icon.svg", "scripts/generate_store_report.py", "scripts/scoring.py", "PRIVACIDAD.md",
+        "assets/icons/icon.svg", "scripts/generate_store_report.py", "scripts/optimize_validation_images.py", "scripts/scoring.py", "PRIVACIDAD.md",
     ]
     for relative in required_files:
         require((ROOT / relative).is_file(), f"Falta {relative}.")
@@ -77,7 +79,10 @@ def main() -> None:
     html_text = (ROOT / "index.html").read_text(encoding="utf-8")
     app_text = (ROOT / "app.js").read_text(encoding="utf-8")
     web_text = "\n".join((ROOT / relative).read_text(encoding="utf-8") for relative in ["index.html", "styles.css", "app.js", "service-worker.js"])
-    require("Información privada" in web_text, "La interfaz debe mostrar el aviso de privacidad.")
+    require("La información publicada es propiedad de la marca" in web_text, "La interfaz debe mostrar el aviso de propiedad y no divulgación.")
+    require("Copyright 2026 © Starbucks México" in web_text, "La interfaz debe mostrar el copyright solicitado.")
+    require("Atajos:" not in html_text, "Los atajos no deben mostrarse en la interfaz.")
+    require("hero-metrics" not in html_text, "La portada no debe mostrar métricas operativas.")
     require(not re.search(r"https?://", web_text, re.IGNORECASE), "La aplicación no debe depender de recursos externos.")
     require('id="storeInput"' in web_text and 'id="validatorInput"' in web_text, "Faltan los dos datos de identidad permitidos.")
     for required_id in [
@@ -88,6 +93,7 @@ def main() -> None:
     require("Descargar JSON" not in html_text and "El JSON descargado" not in html_text, "La interfaz no debe mostrar descarga o instrucción JSON.")
     require("downloadResultJson" not in app_text, "El motor web no debe conservar la descarga JSON visible.")
     require("retentionHours" in app_text, "La aplicación debe aplicar retención local.")
+    require("scheduleAutoAdvance" in app_text and "cancelAutoAdvance" in app_text, "Falta navegación automática segura.")
     dom_block = re.search(r"const ids = \[(.*?)\];", app_text, re.DOTALL)
     require(dom_block is not None, "No se encontró el contrato de elementos DOM.")
     dom_ids = re.findall(r'"([A-Za-z][A-Za-z0-9]+)"', dom_block.group(1))

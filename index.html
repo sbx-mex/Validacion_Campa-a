@@ -21,7 +21,7 @@
     <div>
       <span aria-hidden="true">●</span>
       <strong id="privacyClassification">USO INTERNO</strong>
-      <span id="privacyNotice">Información privada de la compañía · Prohibida su divulgación</span>
+      <span id="privacyNotice">Revisión de campaña · No divulgar</span>
     </div>
     <button id="openPrivacy" type="button">Responsabilidad de uso</button>
   </div>
@@ -53,11 +53,6 @@
           <p id="heroIntro" class="hero-intro">Hagamos que esta temporada se viva en cada tienda.</p>
           <p id="heroPromise" class="hero-promise">Un recorrido cálido, rápido y objetivo para reconocer lo que funciona y corregir lo necesario.</p>
           <div class="together-note"><span aria-hidden="true">♡</span><strong>JUNTÉMONOS</strong><em>más</em></div>
-          <div class="hero-metrics" aria-label="Alcance del recorrido">
-            <div><strong>36</strong><span>controles</span></div>
-            <div><strong>9</strong><span>secciones</span></div>
-            <div><strong>25–30</strong><span>minutos</span></div>
-          </div>
         </div>
       </div>
 
@@ -80,16 +75,9 @@
           <div class="responsibility-icon" aria-hidden="true">✓</div>
           <div>
             <span>ANTES DE CONTINUAR</span>
-            <h4 id="responsibilityTitle">Responsabilidad de uso</h4>
-            <p>La validación se guarda sólo en este dispositivo y se elimina automáticamente después de <strong id="retentionHours">24 horas</strong>.</p>
-            <details>
-              <summary>Qué información no debes registrar</summary>
-              <ul id="prohibitedDataList">
-                <li>Datos personales de clientes o partners</li>
-                <li>Contraseñas, accesos o información financiera</li>
-                <li>Capturas o resultados en canales no autorizados</li>
-              </ul>
-            </details>
+            <h4 id="responsibilityTitle">Uso responsable</h4>
+            <p>Uso exclusivo para revisión de campaña. No captures datos personales ni compartas materiales o resultados fuera de canales autorizados.</p>
+            <small>Guardado local · Eliminación automática en <strong id="retentionHours">24 horas</strong>.</small>
           </div>
         </section>
         <label class="privacy-confirm responsibility-confirm">
@@ -105,11 +93,11 @@
       </form>
 
       <section class="how-it-works" aria-labelledby="howTitle">
-        <h3 id="howTitle">Tres decisiones. Sin interpretación.</h3>
+        <h3 id="howTitle">Elige y avanza.</h3>
         <div class="status-explainer">
-          <article class="status-card status-pass"><b>✓</b><span><strong>Cumple</strong><small>Suma 1 punto</small></span></article>
-          <article class="status-card status-fail"><b>×</b><span><strong>No cumple</strong><small>Suma 0 puntos</small></span></article>
-          <article class="status-card status-na"><b>•</b><span><strong>No aplica</strong><small>No pondera</small></span></article>
+          <article class="status-card status-pass"><b>✓</b><span><strong>Cumple</strong><small>Avanza</small></span></article>
+          <article class="status-card status-fail"><b>×</b><span><strong>No cumple</strong><small>Corrige ahora</small></span></article>
+          <article class="status-card status-na"><b>•</b><span><strong>No aplica</strong><small>Avanza sin ponderar</small></span></article>
         </div>
       </section>
     </section>
@@ -167,10 +155,9 @@
           <div>
             <strong id="responseGuidanceTitle">¡Bien hecho!</strong>
             <p id="responseGuidanceText"></p>
-            <button id="applyCorrection" class="guidance-action" type="button" hidden>Usar esta corrección</button>
+            <button id="applyCorrection" class="guidance-action" type="button" hidden>Usar acción sugerida</button>
           </div>
         </section>
-        <p id="keyboardHint" class="keyboard-hint">Atajos: <kbd>1</kbd> Cumple · <kbd>0</kbd> No cumple · <kbd>N</kbd> No aplica</p>
 
         <label id="commentWrap" class="comment-wrap">
           <span>Comentario breve <small id="commentHint">opcional</small></span>
@@ -235,24 +222,23 @@
   <footer class="site-footer">
     <div><strong>JUNTÉMONOS</strong><em>más</em></div>
     <p>Validación Campaña · Fall 26</p>
-    <small>Información privada de la compañía. Uso exclusivo para operación autorizada.</small>
+    <small>La información publicada es propiedad de la marca y está prohibida su divulgación.</small>
+    <small>Copyright 2026 © Starbucks México</small>
     <button id="openPrivacyFooter" type="button">Consultar responsabilidad de uso</button>
   </footer>
 
   <dialog id="privacyDialog" class="privacy-dialog">
     <button id="closePrivacyDialog" class="dialog-close" type="button" aria-label="Cerrar aviso">×</button>
     <div class="privacy-dialog-icon" aria-hidden="true">✓</div>
-    <span class="campaign-pill">INFORMACIÓN PRIVADA</span>
-    <h2>Protege el material y el resultado</h2>
-    <p>Esta herramienta es exclusiva para la validación operativa autorizada de Fall 26.</p>
-    <ol>
-      <li><b>Registra sólo lo necesario:</b> tienda, responsable y observaciones operativas.</li>
-      <li><b>No captures datos personales:</b> evita nombres de clientes, teléfonos, correos o fotografías de personas.</li>
-      <li><b>Resguarda el reporte:</b> compártelo únicamente por canales internos autorizados.</li>
-      <li><b>Evita exposición pública:</b> no publiques materiales ni resultados en repositorios o sitios abiertos.</li>
-    </ol>
-    <div class="privacy-storage"><span aria-hidden="true">◎</span><div><b>Guardado local</b><small>La aplicación no envía datos a servicios externos.</small></div></div>
-    <button id="acknowledgePrivacy" class="primary-button" type="button">Entendido</button>
+    <span class="campaign-pill">USO INTERNO</span>
+    <h2>Validación privada</h2>
+    <p>Uso exclusivo para revisión de campaña. No captures datos personales ni compartas materiales o resultados fuera de canales autorizados.</p>
+    <div class="privacy-ownership">
+      <strong>La información publicada es propiedad de la marca y está prohibida su divulgación.</strong>
+      <small>Copyright 2026 © Starbucks México</small>
+    </div>
+    <div class="privacy-storage"><span aria-hidden="true">◎</span><div><b>Sólo en este dispositivo</b><small>Sin envío a servicios externos · Retención máxima de 24 horas.</small></div></div>
+    <button id="acknowledgePrivacy" class="primary-button" type="button">Confirmo el uso responsable</button>
   </dialog>
 
   <dialog id="imageDialog" class="image-dialog">

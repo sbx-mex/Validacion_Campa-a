@@ -7,6 +7,7 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const code = fs.readFileSync(path.join(root, "app.js"), "utf8");
+const settingsFile = JSON.parse(fs.readFileSync(path.join(root, "config/settings.json"), "utf8"));
 const context = vm.createContext({
   console,
   Date,
@@ -26,6 +27,8 @@ const invalid = { startedAt: "sin-fecha", completedAt: null };
 assert.equal(context.isSavedStateFresh(recent, 24, now), true, "Un recorrido reciente debe conservarse.");
 assert.equal(context.isSavedStateFresh(stale, 24, now), false, "Un recorrido mayor a 24 horas debe caducar.");
 assert.equal(context.isSavedStateFresh(invalid, 24, now), false, "Una fecha inválida debe rechazarse.");
+assert.deepEqual(settingsFile.experience.navigation.autoAdvanceStatuses, ["cumple", "na"], "Cumple y No aplica deben avanzar solos.");
+assert.equal(settingsFile.experience.navigation.autoAdvanceDelayMs, 650, "La confirmación debe permanecer visible antes de avanzar.");
 
 vm.runInContext(`
   questions = [{id:"q01"},{id:"q02"},{id:"q03"},{id:"q04"}];
@@ -44,4 +47,4 @@ assert.equal(
   "Cada No cumple debe recuperar su corrección inmediata desde JSON.",
 );
 
-console.log("Lógica web válida: retención de 24 h, puntuación sin N/A y corrección inmediata.");
+console.log("Lógica web válida: retención, avance rápido, puntuación sin N/A y corrección inmediata.");
